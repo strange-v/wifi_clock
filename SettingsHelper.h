@@ -70,6 +70,7 @@ public:
 	static bool isSignatureValid();
 	static Settings* get();
 	static void save();
+	static void resetToDefaults();
 	
 	static void setWifiSsid(char *value);
 	static void setWifiPassword(char *value);

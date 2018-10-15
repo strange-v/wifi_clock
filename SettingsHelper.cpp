@@ -6,6 +6,11 @@ void SettingsHelper::init(uint16_t length)
 {
 	EEPROM.begin(length);
 	EEPROM.get(0, _settings);
+
+	if (!isSignatureValid())
+	{
+		resetToDefaults();
+	}
 }
 
 bool SettingsHelper::isSignatureValid()
@@ -30,6 +35,31 @@ void SettingsHelper::save()
 
 	EEPROM.commit();
 	EEPROM.get(0, _settings);
+}
+
+void SettingsHelper::resetToDefaults()
+{
+	setWifiSsid("SSID");
+	setWifiPassword("PWD");
+	setAuthUser("admin");
+	setAuthPassword("admin");
+	setOtaPassword("update");
+
+	setNtpUrl("pool.ntp.org");
+	setSyncPeriod(300);
+	setUseDst(false);
+	setStartDst({ 0, 0, 0, 0, 0 });
+	setEndDst({ 0, 0, 0, 0, 0 });
+
+	setLeadingZero(true);
+	setBlinkColumn(true);
+	setDoNotBlink(false);
+	setDnbFrom({ 0, 0 });
+	setDnbTo({ 0, 0 });
+	setMinBrightness(1);
+	setMaxBrightness(4095);
+
+	save();
 }
 
 #pragma region System
