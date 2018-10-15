@@ -2,18 +2,17 @@
 
 void connectToNetwork(bool fallbackToAp)
 {
-	Settings* sett = SettingsHelper::get();
-	_connectionState = CS_CONNECTING_W_AP;
-	_connectionStart = millis();
-
-	WiFi.mode(WIFI_STA);
-	WiFi.begin(sett->wifiSSID, sett->wifiPwd);
-
-	taskManager.StartTask(&taskManageNetwork);
-
+	ehNetworkConnected = WiFi.onStationModeGotIP([](const WiFiEventStationModeGotIP& event)
+	{
+		_connectionState = CS_CONNECTED;
 #ifdef _DEBUG
-	Serial.println(F("Connecting"));
+		Serial.println();
+		printNetworkInfo();
 #endif
+		syncTime();
+	});
+
+	_connectToNetwork(fallbackToAp);
 }
 
 void disconnectFromNetwork()
@@ -44,87 +43,55 @@ void startSoftAP()
 #endif
 }
 
-void _manageNetwork(uint32_t deltaTime)
+void _connectToNetwork(bool fallbackToAp)
+{
+	Settings* sett = SettingsHelper::get();
+
+	_connectionState = CS_CONNECTING_W_AP;
+	_connectionStart = millis();
+
+	WiFi.disconnect();
+	WiFi.begin(sett->wifiSSID, sett->wifiPwd);
+
+	taskManager.StartTask(&taskCheckConnection);
+
+#ifdef _DEBUG
+	Serial.print(F("SSID: "));
+	Serial.print(sett->wifiSSID);
+	Serial.print(F(" PWD: "));
+	Serial.println(sett->wifiPwd);
+	Serial.println(F("Connecting"));
+#endif
+}
+
+void _checkConnection(uint32_t deltaTime)
 {
 	unsigned long ms = millis();
-//#ifdef _DEBUG
-//	Serial.println(_connectionState);
-//	Serial.println(WiFi.status());
-//	Serial.println(ms - _connectionStart);
-//	Serial.println();
-//#endif
 
-	switch (_connectionState)
+	if (WiFi.isConnected())
 	{
-	case CS_CONNECTED:
-	{
-		_connectionState = (WiFi.status() == WL_CONNECTED)
-			? CS_CONNECTED
-			: CS_DISCONNECTED;
-
-		if (_connectionState == CS_DISCONNECTED)
-		{
-			taskManager.StopTask(&taskManageNetwork);
-		}
-		break;
+		_connectionState = CS_CONNECTED;
+		taskManager.StopTask(&taskCheckConnection);
+		return;
 	}
-	case CS_CONNECTING:
-	case CS_CONNECTING_W_AP:
+
+#ifdef _DEBUG
+	Serial.print('.');
+#endif
+
+	if (ms - _connectionStart > Cfg::wifiConnectionTimeout || ms < _connectionStart)
 	{
-#ifdef _DEBUG
-		Serial.print('.');
-#endif
-
-		if (WiFi.status() == WL_CONNECTED)
+		if (_connectionState == CS_CONNECTING_W_AP)
 		{
-			_connectionState = CS_CONNECTED;
-
-#ifdef _DEBUG
-			Serial.println();
-			printNetworkInfo();
-#endif
-			break;
-		}
-
-		if (ms - _connectionStart > Cfg::wifiConnectionTimeout || ms < _connectionStart)
-		{
-			_connectionState = _connectionState == CS_CONNECTING_W_AP ? CS_STARTING_ACCESS_POINT : CS_DISCONNECTING;
-			WiFi.mode(WIFI_STA);
+			taskManager.StopTask(&taskCheckConnection);
 			WiFi.disconnect();
-		}
-		else
-		{
-			Settings* sett = SettingsHelper::get();
-			WiFi.mode(WIFI_STA);
-			WiFi.begin(sett->wifiSSID, sett->wifiPwd);
-		}
-		break;
-	}
-	case CS_STARTING_ACCESS_POINT:
-	{
-		if (WiFi.status() == WL_DISCONNECTED || WiFi.status() == WL_IDLE_STATUS)
-		{
 			startSoftAP();
 		}
-		break;
-	}
-	case CS_DISCONNECTING:
-	{
-		if (WiFi.status() == WL_DISCONNECTED || WiFi.status() == WL_IDLE_STATUS)
-		{
-			_connectionState = CS_DISCONNECTED;
-		}
-		break;
-	}
-	case CS_ACCESS_POINT:
-	case CS_DISCONNECTED:
-	default:
-		break;
 	}
 }
 
 void _turnOfAp(uint32_t deltaTime)
 {
+	taskManager.StopTask(&taskTurnOfAp);
 	WiFi.softAPdisconnect();
-	connectToNetwork(true);
 }
