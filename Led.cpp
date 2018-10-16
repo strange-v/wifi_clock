@@ -69,6 +69,9 @@ void Led::_showDigit(byte value, byte position)
 	if (value > 13)
 		value = 11;
 
+	if (_digit[position] == value)
+		return;
+
 	_digit[position] = value;
 	Adafruit_PWMServoDriver* pwm = position > 1 ? _pwm2 : _pwm1 ;
 	byte idx = position % 2 == 0 ? 0 : 8;

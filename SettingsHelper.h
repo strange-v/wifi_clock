@@ -49,6 +49,7 @@ struct Settings
 	char ntpUrl[32];
 	unsigned int syncPeriod;
 	bool useDST;
+	//ToDO: Maybe use TimeChangeRule here?
 	DSTTime startDST;
 	DSTTime endDST;
 #pragma endregion

@@ -7,27 +7,33 @@
 #include <Wire.h>
 #include <BH1750.h>
 #include <RtcDS1307.h>
+#include <Timezone.h>
 #include <Adafruit_PWMServoDriver.h>
 #include "SettingsHelper.h"
 #include "Network.h"
 #include "Cfg.h"
 #include "Led.h"
 #include "TimeSync.h"
+#include "DisplayFunctionality.h"
 
 WiFiEventHandler ehNetworkConnected, ehNetworkDisconnected;
 TaskManager taskManager;
 FunctionTask taskCheckConnection(_checkConnection, MsToTaskTime(5 *1000));
 FunctionTask taskTurnOfAp(_turnOfAp, MsToTaskTime(2 * 60 * 1000));
+FunctionTask taskSyncTime(_syncTime, MsToTaskTime(15 * 1000));
 
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP);
 BH1750 lightMeter;
 RtcDS1307<TwoWire> Rtc(Wire);
 Led led(&Wire, Cfg::pinOe);
+Timezone* timezone;
 
 Settings* _cfg;
 ConnectionState _connectionState = CS_DISCONNECTED;
 unsigned long _connectionStart = 0;
+volatile byte _rtcPinState = LOW;
+volatile byte _updateDisplay = 0;
 unsigned long _testTime = 0;
 
 void setup()
@@ -52,7 +58,8 @@ void setup()
 	Wire.setClock(400000);
 
 	pinMode(Cfg::pinOe, OUTPUT);
-	pinMode(Cfg::pinRtcInt, INPUT);
+	pinMode(Cfg::pinRtcInt, INPUT_PULLUP);
+	attachInterrupt(digitalPinToInterrupt(Cfg::pinRtcInt), rtcInterrupt, CHANGE);
 
 	bool lightMeterState = lightMeter.begin();
 #ifdef _DEBUG
@@ -80,13 +87,17 @@ void setup()
 		Rtc.SetIsRunning(true);
 	}
 
+	//ToDo: Read this from a config
+	TimeChangeRule dst = { "DST", Last, Sun, Mar, 3, 180 };
+	TimeChangeRule std = { "STD", Last, Sun, Oct, 4, 120 };
+	timezone = new Timezone(dst, std);
+
 	timeClient.begin();
 	timeClient.setPoolServerName(_cfg->ntpUrl);
 
 	connectToNetwork(true);
 
 	led.begin();
-	led.showTime(12, 50);
 }
 
 void loop()
@@ -95,6 +106,12 @@ void loop()
 	yield();
 	taskManager.Loop();
 	yield();
+
+	if (_updateDisplay > 0)
+	{
+		_updateDisplay--;
+		updateDisplay();
+	}
 
 	unsigned long ms = millis();
 	if (ms - _testTime > 10000 || ms < _testTime)

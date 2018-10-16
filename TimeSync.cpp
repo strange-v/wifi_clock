@@ -1,13 +1,14 @@
 #include "TimeSync.h"
 
-void syncTime()
+bool syncTime()
 {
-	if (timeClient.update())
+	bool result = timeClient.update();
+	if (result)
 	{
 		unsigned long epoch = timeClient.getEpochTime();
-		//timeClient.setTimeOffset(3);
+		time_t local = timezone->toLocal(epoch);
 
-		Rtc.SetDateTime(RtcDateTime(epoch));
+		Rtc.SetDateTime(RtcDateTime(local));
 #ifdef _DEBUG
 		Serial.print(F("Time: "));
 		Serial.println(timeClient.getFormattedTime());
@@ -19,5 +20,13 @@ void syncTime()
 		Serial.println(F("NTP error"));
 #endif
 	}
-	
+	return result;
+}
+
+void _syncTime(uint32_t deltaTime)
+{
+	if (syncTime())
+	{
+		taskManager.StopTask(&taskSyncTime);
+	}
 }

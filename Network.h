@@ -25,6 +25,7 @@ extern WiFiEventHandler ehNetworkDisconnected;
 extern TaskManager taskManager;
 extern FunctionTask taskCheckConnection;
 extern FunctionTask taskTurnOfAp;
+extern FunctionTask taskSyncTime;
 
 extern ConnectionState _connectionState;
 extern unsigned long _connectionStart;

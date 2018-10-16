@@ -108,6 +108,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cfg.h" />
+    <ClInclude Include="DisplayFunctionality.h" />
     <ClInclude Include="Led.h" />
     <ClInclude Include="Module.h" />
     <ClInclude Include="Network.h" />
@@ -116,6 +117,7 @@
     <ClInclude Include="__vm\.wifi_clock.vsarduino.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DisplayFunctionality.cpp" />
     <ClCompile Include="Led.cpp" />
     <ClCompile Include="Module.cpp" />
     <ClCompile Include="Network.cpp" />

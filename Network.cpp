@@ -9,7 +9,7 @@ void connectToNetwork(bool fallbackToAp)
 		Serial.println();
 		printNetworkInfo();
 #endif
-		syncTime();
+		taskManager.StartTask(&taskSyncTime);
 	});
 
 	_connectToNetwork(fallbackToAp);
