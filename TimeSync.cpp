@@ -6,9 +6,10 @@ bool syncTime()
 	if (result)
 	{
 		unsigned long epoch = timeClient.getEpochTime();
-		time_t local = timezone->toLocal(epoch);
+		time_t local = timezone->toLocal(epoch - 946684800l); //ToDo: Move this constatn to an appropriate place
 
-		Rtc.SetDateTime(RtcDateTime(local));
+		RtcDateTime date = RtcDateTime(local);
+		Rtc.SetDateTime(date);
 #ifdef _DEBUG
 		Serial.print(F("Time: "));
 		Serial.println(timeClient.getFormattedTime());
