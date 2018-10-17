@@ -5,6 +5,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <RtcDS3231.h>
+#include <BH1750.h>
 #include <TimeLib.h>
 #include "SettingsHelper.h"
 #include "Led.h"
@@ -15,6 +16,7 @@ void updateDisplay();
 bool isTimeBetween(RtcDateTime time, SimpleTime start, SimpleTime end);
 
 extern RtcDS3231<TwoWire> Rtc;
+extern BH1750 lightMeter;
 extern Led led;
 
 extern Settings* _cfg;

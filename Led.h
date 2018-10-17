@@ -16,7 +16,9 @@ public:
 	void showDot(bool show);
 	void setPWM(uint16_t value);
 private:
-	void _showDigit(byte value, byte position);
+	void _showDigit(byte value, byte position, bool force = false);
+	void __showColumn(bool show, bool force = false);
+	void __showDot(bool show, bool force = false);
 
 	Adafruit_PWMServoDriver* _pwm1;
 	Adafruit_PWMServoDriver* _pwm2;

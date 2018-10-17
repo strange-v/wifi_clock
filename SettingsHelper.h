@@ -5,6 +5,7 @@
 
 const uint32_t SETTINFS_SIGNATURE = 312647204l;
 
+//ToDO: Move this struct to some better plase
 struct SimpleTime
 {
 	byte hour;

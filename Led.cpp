@@ -25,6 +25,10 @@ void Led::begin()
 	_pwm2->setPWMFreq(1600);
 
 	digitalWrite(_pinOe, LOW);
+
+	//ToDo: implement clear display
+	showDot(false);
+	showColumn(false);
 }
 
 void Led::showTime(RtcDateTime time, bool leadingZero)
@@ -45,20 +49,12 @@ void Led::showSsid(byte id)
 
 void Led::showColumn(bool show)
 {
-	if (_showColumn == show)
-		return;
-
-	_showColumn = show;
-	_pwm2->setPWM(15, 0, show ? _pwmValue : 0);
+	__showColumn(show);
 }
 
 void Led::showDot(bool show)
 {
-	if (_showDot == show)
-		return;
-
-	_showDot = show;
-	_pwm1->setPWM(15, 0, show ? _pwmValue : 0);
+	__showDot(show);
 }
 
 void Led::setPWM(uint16_t value)
@@ -68,21 +64,21 @@ void Led::setPWM(uint16_t value)
 
 	_pwmValue = value;
 	
-	_showDigit(_digit[0], 0);
-	_showDigit(_digit[1], 1);
-	_showDigit(_digit[2], 2);
-	_showDigit(_digit[3], 3);
+	_showDigit(_digit[0], 0, true);
+	_showDigit(_digit[1], 1, true);
+	_showDigit(_digit[2], 2, true);
+	_showDigit(_digit[3], 3, true);
 	
-	showDot(_showDot);
-	showColumn(_showColumn);
+	__showDot(_showDot, true);
+	__showColumn(_showColumn, true);
 }
 
-void Led::_showDigit(byte value, byte position)
+void Led::_showDigit(byte value, byte position, bool force)
 {
 	if (value > 13)
 		value = 11;
 
-	if (_digit[position] == value)
+	if (_digit[position] == value && !force)
 		return;
 
 	_digit[position] = value;
@@ -94,4 +90,22 @@ void Led::_showDigit(byte value, byte position)
 		bool show = digitMap[value][i] == 1;
 		pwm->setPWM(i + idx, 0, show ? _pwmValue : 0); //ToDo: Trye to use set pin
 	}
+}
+//ToDo: Rename
+void Led::__showColumn(bool show, bool force)
+{
+	if (_showColumn == show && !force)
+		return;
+
+	_showColumn = show;
+	_pwm2->setPWM(15, 0, show ? _pwmValue : 0);
+}
+//ToDo: Rename
+void Led::__showDot(bool show, bool force)
+{
+	if (_showDot == show && !force)
+		return;
+
+	_showDot = show;
+	_pwm1->setPWM(15, 0, show ? _pwmValue : 0);
 }

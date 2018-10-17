@@ -9,6 +9,9 @@ void rtcInterrupt()
 void updateDisplay()
 {
 	RtcDateTime now = Rtc.GetDateTime();
+
+	uint16_t lux = lightMeter.readLightLevel();
+	led.setPWM(lux > 0 ? lux : 1);
 	
 	if (_cfg->blinkColumn
 		&& (!_cfg->doNotBlink || !isTimeBetween(now, _cfg->dnbFrom, _cfg->dnbTo)))
