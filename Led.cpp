@@ -23,12 +23,12 @@ void Led::begin()
 	digitalWrite(_pinOe, LOW);
 }
 
-void Led::showTime(byte hour, byte minute)
+void Led::showTime(RtcDateTime time, bool leadingZero)
 {
-	_showDigit(hour / 10, 0);
-	_showDigit(hour % 10, 1);
-	_showDigit(minute / 10, 2);
-	_showDigit(minute % 10, 3);
+	_showDigit(time.Hour() < 10 && !leadingZero ? 10 : time.Hour() / 10, 0);
+	_showDigit(time.Hour() % 10, 1);
+	_showDigit(time.Minute() / 10, 2);
+	_showDigit(time.Minute() % 10, 3);
 }
 
 void Led::showSsid(byte id)
@@ -75,6 +75,10 @@ void Led::setPWM(uint16_t value)
 
 void Led::_showDigit(byte value, byte position)
 {
+	Serial.print("V:");
+	Serial.print(value);
+	Serial.print(" P:");
+	Serial.println(position);
 	if (value > 13)
 		value = 11;
 

@@ -13,5 +13,5 @@ void updateDisplay()
 	//ToDo: Add do not blick functionality
 
 	led.showColumn(static_cast<bool>(_rtcPinState));
-	led.showTime(now.Hour(), now.Minute());
+	led.showTime(now, _cfg->leadingZero);
 }

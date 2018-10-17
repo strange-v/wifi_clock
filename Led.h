@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
+#include <RtcDS3231.h>
 
 #pragma once
 class Led
@@ -9,7 +10,7 @@ public:
 	Led(TwoWire* wire, byte pinOe);
 	~Led();
 	void begin();
-	void showTime(byte hour, byte minute);
+	void showTime(RtcDateTime time, bool leadingZero);
 	void showSsid(byte id);
 	void showColumn(bool show);
 	void showDot(bool show);
@@ -21,7 +22,7 @@ private:
 	Adafruit_PWMServoDriver* _pwm2;
 	byte _pinOe;
 	uint16_t _pwmValue = 100;
-	byte _digit[4];
+	byte _digit[4]{10, 10, 10, 10};
 	bool _showColumn;
 	bool _showDot;
 
