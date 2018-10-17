@@ -12,6 +12,7 @@
 
 void rtcInterrupt();
 void updateDisplay();
+bool isTimeBetween(RtcDateTime time, SimpleTime start, SimpleTime end);
 
 extern RtcDS3231<TwoWire> Rtc;
 extern Led led;

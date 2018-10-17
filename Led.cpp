@@ -17,6 +17,10 @@ void Led::begin()
 {
 	_pwm1->begin();
 	_pwm2->begin();
+
+	_pwm1->reset();
+	_pwm2->reset();
+
 	_pwm1->setPWMFreq(1600);
 	_pwm2->setPWMFreq(1600);
 
@@ -75,10 +79,6 @@ void Led::setPWM(uint16_t value)
 
 void Led::_showDigit(byte value, byte position)
 {
-	Serial.print("V:");
-	Serial.print(value);
-	Serial.print(" P:");
-	Serial.println(position);
 	if (value > 13)
 		value = 11;
 

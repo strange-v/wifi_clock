@@ -3,7 +3,7 @@
 #include <EEPROM.h>
 #include <Timezone.h>
 
-const uint32_t SETTINFS_SIGNATURE = 312667204l;
+const uint32_t SETTINFS_SIGNATURE = 312647204l;
 
 struct SimpleTime
 {
@@ -17,6 +17,22 @@ struct SimpleTime
 	bool operator!=(const SimpleTime& b)
 	{
 		return !this->operator==(b);
+	}
+	bool operator>(const SimpleTime& b)
+	{
+		return (hour > b.hour || (hour == b.hour && minute > b.minute));
+	}
+	bool operator>=(const SimpleTime& b)
+	{
+		return !this->operator==(b) || this->operator>(b);
+	}
+	bool operator<(const SimpleTime& b)
+	{
+		return !this->operator>(b);
+	}
+	bool operator<=(const SimpleTime& b)
+	{
+		return this->operator==(b) || !this->operator>(b);
 	}
 };
 struct Settings
@@ -33,7 +49,6 @@ struct Settings
 	char ntpUrl[32];
 	unsigned int syncPeriod;
 	bool useDST;
-	//ToDO: Maybe use TimeChangeRule here?
 	TimeChangeRule startDST;
 	TimeChangeRule endDST;
 #pragma endregion

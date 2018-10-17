@@ -10,8 +10,29 @@ void updateDisplay()
 {
 	RtcDateTime now = Rtc.GetDateTime();
 	
-	//ToDo: Add do not blick functionality
+	if (_cfg->blinkColumn
+		&& (!_cfg->doNotBlink || !isTimeBetween(now, _cfg->dnbFrom, _cfg->dnbTo)))
+	{
+		led.showColumn(static_cast<bool>(_rtcPinState));
+	}
+	else
+	{
+		led.showColumn(false);
+	}
 
-	led.showColumn(static_cast<bool>(_rtcPinState));
 	led.showTime(now, _cfg->leadingZero);
+}
+
+bool isTimeBetween(RtcDateTime time, SimpleTime start, SimpleTime end)
+{
+	SimpleTime checkTime{ time.Hour(), time.Minute() };
+	
+	if (start < end)
+	{
+		return checkTime >= start && checkTime <= end;
+	}
+	else
+	{
+		return checkTime >= start || checkTime <= end;
+	}
 }

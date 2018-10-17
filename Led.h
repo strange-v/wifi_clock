@@ -23,8 +23,8 @@ private:
 	byte _pinOe;
 	uint16_t _pwmValue = 100;
 	byte _digit[4]{10, 10, 10, 10};
-	bool _showColumn;
-	bool _showDot;
+	byte _showColumn = 255;
+	byte _showDot = 255;
 
 	const byte digitMap[14][7] = {
 		{1, 1, 1, 1, 1, 1, 0}, //0
