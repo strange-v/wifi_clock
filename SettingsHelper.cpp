@@ -39,6 +39,9 @@ void SettingsHelper::save()
 
 void SettingsHelper::resetToDefaults()
 {
+	TimeChangeRule dst = { "DST", Last, Sun, Mar, 3, 180 };
+	TimeChangeRule std = { "STD", Last, Sun, Oct, 4, 120 };
+
 	setWifiSsid("SSID");
 	setWifiPassword("PWD");
 	setAuthUser("admin");
@@ -47,9 +50,9 @@ void SettingsHelper::resetToDefaults()
 
 	setNtpUrl("pool.ntp.org");
 	setSyncPeriod(300);
-	setUseDst(false);
-	setStartDst({ 0, 0, 0, 0, 0 });
-	setEndDst({ 0, 0, 0, 0, 0 });
+	setUseDst(true);
+	setStartDst(dst);
+	setEndDst(std);
 
 	setLeadingZero(true);
 	setBlinkColumn(true);
@@ -134,17 +137,17 @@ void SettingsHelper::setUseDst(bool value)
 	}
 }
 
-void SettingsHelper::setStartDst(DSTTime value)
+void SettingsHelper::setStartDst(TimeChangeRule value)
 {
-	if (value != _settings.startDST)
+	if (!isEqual(value, _settings.startDST))
 	{
 		EEPROM.put(offsetof(Settings, Settings::startDST), value);
 	}
 }
 
-void SettingsHelper::setEndDst(DSTTime value)
+void SettingsHelper::setEndDst(TimeChangeRule value)
 {
-	if (value != _settings.endDST)
+	if (isEqual(value, _settings.endDST))
 	{
 		EEPROM.put(offsetof(Settings, Settings::endDST), value);
 	}
@@ -223,4 +226,14 @@ void SettingsHelper::makeStringSafe(char *value, uint maxLen)
 	{
 		value[maxLen - 1] = '\0';
 	}
+}
+
+bool SettingsHelper::isEqual(TimeChangeRule a, TimeChangeRule b)
+{
+	return strcmp(a.abbrev, b.abbrev)
+		&& a.week == b.week
+		&& a.dow == b.dow
+		&& a.month == b.month
+		&& a.hour == b.hour
+		&& a.offset == b.offset;
 }

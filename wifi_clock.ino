@@ -88,11 +88,7 @@ void setup()
 		Rtc.SetIsRunning(true);
 	}
 
-	//ToDo: Read this from a config
-	TimeChangeRule dst = { "DST", Last, Sun, Mar, 3, 180 };
-	TimeChangeRule std = { "STD", Last, Sun, Oct, 4, 120 };
-	timezone = new Timezone(dst, std);
-
+	timezone = new Timezone(_cfg->startDST, _cfg->endDST);
 	timeClient.begin();
 	timeClient.setPoolServerName(_cfg->ntpUrl);
 

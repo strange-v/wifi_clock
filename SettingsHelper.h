@@ -1,26 +1,10 @@
 #pragma once
 #include <Arduino.h>
 #include <EEPROM.h>
+#include <Timezone.h>
 
-const uint32_t SETTINFS_SIGNATURE = 312668204l;
+const uint32_t SETTINFS_SIGNATURE = 312667204l;
 
-struct DSTTime
-{
-	byte week;
-	byte dow;
-	byte month;
-	byte hour;
-	unsigned int offset;
-
-	bool operator==(const DSTTime& b)
-	{
-		return (week == b.week && dow == b.dow && month == b.month && hour == b.hour && offset == b.offset);
-	}
-	bool operator!=(const DSTTime& b)
-	{
-		return !this->operator==(b);
-	}
-};
 struct SimpleTime
 {
 	byte hour;
@@ -50,8 +34,8 @@ struct Settings
 	unsigned int syncPeriod;
 	bool useDST;
 	//ToDO: Maybe use TimeChangeRule here?
-	DSTTime startDST;
-	DSTTime endDST;
+	TimeChangeRule startDST;
+	TimeChangeRule endDST;
 #pragma endregion
 #pragma region Display
 	bool leadingZero;
@@ -82,8 +66,8 @@ public:
 	static void setNtpUrl(char *value);
 	static void setSyncPeriod(unsigned int value);
 	static void setUseDst(bool value);
-	static void setStartDst(DSTTime value);
-	static void setEndDst(DSTTime value);
+	static void setStartDst(TimeChangeRule value);
+	static void setEndDst(TimeChangeRule value);
 
 	static void setLeadingZero(bool value);
 	static void setBlinkColumn(bool value);
@@ -95,6 +79,7 @@ public:
 private:
 	static void writeString(char *value, uint16_t addr, uint8_t len);
 	static void makeStringSafe(char *value, uint maxLen);
+	static bool isEqual(TimeChangeRule a, TimeChangeRule b);
 
 	static Settings _settings;
 };
