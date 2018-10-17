@@ -4,16 +4,19 @@
 
 #include <Arduino.h>
 #include <Wire.h>
-#include <RtcDS1307.h>
+#include <RtcDS3231.h>
+#include <TimeLib.h>
+#include "SettingsHelper.h"
 #include "Led.h"
 #include "Cfg.h"
 
 void rtcInterrupt();
 void updateDisplay();
 
-extern RtcDS1307<TwoWire> Rtc;
+extern RtcDS3231<TwoWire> Rtc;
 extern Led led;
 
+extern Settings* _cfg;
 extern volatile byte _rtcPinState;
 extern volatile byte _updateDisplay;
 

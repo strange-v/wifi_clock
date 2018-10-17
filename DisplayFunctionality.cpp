@@ -8,8 +8,10 @@ void rtcInterrupt()
 
 void updateDisplay()
 {
-	led.showColumn(static_cast<bool>(_rtcPinState));
-
 	RtcDateTime now = Rtc.GetDateTime();
+	
+	//ToDo: Add do not blick functionality
+
+	led.showColumn(static_cast<bool>(_rtcPinState));
 	led.showTime(now.Hour(), now.Minute());
 }

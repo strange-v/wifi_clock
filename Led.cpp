@@ -41,18 +41,27 @@ void Led::showSsid(byte id)
 
 void Led::showColumn(bool show)
 {
+	if (_showColumn == show)
+		return;
+
 	_showColumn = show;
 	_pwm2->setPWM(15, 0, show ? _pwmValue : 0);
 }
 
 void Led::showDot(bool show)
 {
+	if (_showDot == show)
+		return;
+
 	_showDot = show;
 	_pwm1->setPWM(15, 0, show ? _pwmValue : 0);
 }
 
 void Led::setPWM(uint16_t value)
 {
+	if (_pwmValue == value)
+		return;
+
 	_pwmValue = value;
 	
 	_showDigit(_digit[0], 0);

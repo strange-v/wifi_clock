@@ -6,7 +6,7 @@
 #include <NTPClient.h>
 #include <Wire.h>
 #include <BH1750.h>
-#include <RtcDS1307.h>
+#include <RtcDS3231.h>
 #include <Timezone.h>
 #include <Adafruit_PWMServoDriver.h>
 #include "SettingsHelper.h"
@@ -25,7 +25,7 @@ FunctionTask taskSyncTime(_syncTime, MsToTaskTime(15 * 1000));
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP);
 BH1750 lightMeter;
-RtcDS1307<TwoWire> Rtc(Wire);
+RtcDS3231<TwoWire> Rtc(Wire);
 Led led(&Wire, Cfg::pinOe);
 Timezone* timezone;
 
@@ -70,7 +70,8 @@ void setup()
 #endif
 
 	Rtc.Begin();
-	Rtc.SetSquareWavePin(DS1307SquareWaveOut_1Hz);
+	Rtc.SetSquareWavePin(DS3231SquareWavePin_ModeClock);
+	Rtc.SetSquareWavePinClockFrequency(DS3231SquareWaveClock_1Hz);
 	if (!Rtc.IsDateTimeValid())
 	{
 #ifdef _DEBUG
