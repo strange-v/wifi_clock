@@ -15,7 +15,7 @@ void updateDisplay()
 	led.setPWM(lux > 0 ? lux : 1);
 	
 	if (_cfg->blinkColumn
-		&& (!_cfg->doNotBlink || !isTimeBetween(checkTime, _cfg->dnbFrom, _cfg->dnbTo)))
+		&& (!_cfg->doNotBlink || !isTimeBetween(checkTime, _cfg->dnbFrom, _cfg->dnbTo - 1)))
 	{
 		led.showColumn(static_cast<bool>(_rtcPinState));
 	}
