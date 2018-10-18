@@ -2,40 +2,10 @@
 #include <Arduino.h>
 #include <EEPROM.h>
 #include <Timezone.h>
+#include "SimpleTime.h"
 
 const uint32_t SETTINFS_SIGNATURE = 312647204l;
 
-//ToDO: Move this struct to some better plase
-struct SimpleTime
-{
-	byte hour;
-	byte minute;
-
-	bool operator==(const SimpleTime& b)
-	{
-		return (hour == b.hour && minute == b.minute);
-	}
-	bool operator!=(const SimpleTime& b)
-	{
-		return !this->operator==(b);
-	}
-	bool operator>(const SimpleTime& b)
-	{
-		return (hour > b.hour || (hour == b.hour && minute > b.minute));
-	}
-	bool operator>=(const SimpleTime& b)
-	{
-		return !this->operator==(b) || this->operator>(b);
-	}
-	bool operator<(const SimpleTime& b)
-	{
-		return !this->operator>(b);
-	}
-	bool operator<=(const SimpleTime& b)
-	{
-		return this->operator==(b) || !this->operator>(b);
-	}
-};
 struct Settings
 {
 	uint32_t signature;

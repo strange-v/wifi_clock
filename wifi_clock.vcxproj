@@ -113,6 +113,7 @@
     <ClInclude Include="Module.h" />
     <ClInclude Include="Network.h" />
     <ClInclude Include="SettingsHelper.h" />
+    <ClInclude Include="SimpleTime.h" />
     <ClInclude Include="TimeSync.h" />
     <ClInclude Include="__vm\.wifi_clock.vsarduino.h" />
   </ItemGroup>
