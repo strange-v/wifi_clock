@@ -49,12 +49,12 @@ void Led::showSsid(byte id)
 
 void Led::showColumn(bool show)
 {
-	__showColumn(show);
+	_showColumn(show);
 }
 
 void Led::showDot(bool show)
 {
-	__showDot(show);
+	_showDot(show);
 }
 
 void Led::setPWM(uint16_t value)
@@ -69,8 +69,8 @@ void Led::setPWM(uint16_t value)
 	_showDigit(_digit[2], 2, true);
 	_showDigit(_digit[3], 3, true);
 	
-	__showDot(_showDot, true);
-	__showColumn(_showColumn, true);
+	_showDot(_dotState, true);
+	_showColumn(_columnState, true);
 }
 
 void Led::_showDigit(byte value, byte position, bool force)
@@ -88,24 +88,42 @@ void Led::_showDigit(byte value, byte position, bool force)
 	for (size_t i = 0; i < 7; i++)
 	{
 		bool show = digitMap[value][i] == 1;
-		pwm->setPWM(i + idx, 0, show ? _pwmValue : 0); //ToDo: Trye to use set pin
+		pwm->setPin(i + idx, show ? _pwmValue : 0);
 	}
 }
-//ToDo: Rename
-void Led::__showColumn(bool show, bool force)
+
+void Led::_showColumn(bool show, bool force)
 {
-	if (_showColumn == show && !force)
+	if (_columnState == show && !force)
 		return;
 
-	_showColumn = show;
-	_pwm2->setPWM(15, 0, show ? _pwmValue : 0);
+	_columnState = show;
+	_pwm2->setPin(15, show ? _pwmValue : 0);
 }
-//ToDo: Rename
-void Led::__showDot(bool show, bool force)
+
+void Led::_showDot(bool show, bool force)
 {
-	if (_showDot == show && !force)
+	if (_dotState == show && !force)
 		return;
 
-	_showDot = show;
-	_pwm1->setPWM(15, 0, show ? _pwmValue : 0);
+	_dotState = show;
+	_pwm1->setPin(15, show ? _pwmValue : 0);
+}
+
+void Led::spin()
+{
+	for (byte p = 0; p < 4; p++)
+	{
+		Adafruit_PWMServoDriver* pwm = p > 1 ? _pwm2 : _pwm1;
+		byte idx = p % 2 == 0 ? 0 : 8;
+		for (size_t i = 0; i < 7; i++)
+		{
+			bool show = spinMap[_idx][p] == i;
+			pwm->setPin(i + idx, show ? _pwmValue : 0);
+		}
+	}
+
+	_idx++;
+	if (_idx > 5)
+		_idx = 0;
 }

@@ -15,18 +15,20 @@ public:
 	void showColumn(bool show);
 	void showDot(bool show);
 	void setPWM(uint16_t value);
+	void spin();
 private:
 	void _showDigit(byte value, byte position, bool force = false);
-	void __showColumn(bool show, bool force = false);
-	void __showDot(bool show, bool force = false);
+	void _showColumn(bool show, bool force = false);
+	void _showDot(bool show, bool force = false);
 
 	Adafruit_PWMServoDriver* _pwm1;
 	Adafruit_PWMServoDriver* _pwm2;
 	byte _pinOe;
 	uint16_t _pwmValue = 100;
 	byte _digit[4]{10, 10, 10, 10};
-	byte _showColumn = 255;
-	byte _showDot = 255;
+	byte _columnState = 255;
+	byte _dotState = 255;
+	byte _idx = 0;
 
 	const byte digitMap[14][7] = {
 		{1, 1, 1, 1, 1, 1, 0}, //0
@@ -40,10 +42,18 @@ private:
 		{1, 1, 1, 1, 1, 1, 1}, //8
 		{1, 1, 1, 1, 0, 1, 1}, //9
 
-		{0, 0, 0, 0, 0, 0, 0}, //empty
-		{0, 0, 0, 0, 0, 0, 1}, //-
-		{1, 0, 0, 1, 1, 1, 0}, //C
-		{0, 0, 0, 1, 1, 1, 0}, //L
+		{0, 0, 0, 0, 0, 0, 0}, //10 empty
+		{0, 0, 0, 0, 0, 0, 1}, //11 -
+		{1, 0, 0, 1, 1, 1, 0}, //12 C
+		{0, 0, 0, 1, 1, 1, 0}, //13 L
+	};
+	const byte spinMap[6][4] = {
+		{0, 9, 9, 3},
+		{9, 0, 3, 9},
+		{9, 3, 0, 9},
+		{3, 9, 9, 0},
+		{4, 9, 9, 1},
+		{5, 9, 9, 2},
 	};
 };
 

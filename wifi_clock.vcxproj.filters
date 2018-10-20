@@ -27,16 +27,10 @@
     <ClInclude Include="Cfg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Network.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Module.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Led.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TimeSync.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DisplayFunctionality.h">
@@ -45,12 +39,21 @@
     <ClInclude Include="SimpleTime.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="NetworkFunctionality.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ClockMode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WebServerFunctionality.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WebServerConstants.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SettingsHelper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Network.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Module.cpp">
@@ -59,10 +62,13 @@
     <ClCompile Include="Led.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TimeSync.cpp">
+    <ClCompile Include="DisplayFunctionality.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DisplayFunctionality.cpp">
+    <ClCompile Include="NetworkFunctionality.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WebServerFunctionality.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

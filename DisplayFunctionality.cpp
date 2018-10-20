@@ -8,21 +8,32 @@ void rtcInterrupt()
 
 void updateDisplay()
 {
-	RtcDateTime now = Rtc.GetDateTime();
-	SimpleTime checkTime{ now.Hour(), now.Minute() };
-
-	uint16_t lux = lightMeter.readLightLevel();
-	led.setPWM(lux > 0 ? lux : 1);
-	
-	if (_cfg->blinkColumn
-		&& (!_cfg->doNotBlink || !isTimeBetween(checkTime, _cfg->dnbFrom, _cfg->dnbTo - 1)))
+	if (_clockMode == CM_CLOCK)
 	{
-		led.showColumn(static_cast<bool>(_rtcPinState));
-	}
-	else
-	{
-		led.showColumn(false);
-	}
+		RtcDateTime now = Rtc.GetDateTime();
+		SimpleTime checkTime(now.Hour(), now.Minute());
 
-	led.showTime(now, _cfg->leadingZero);
+		uint16_t lux = lightMeter.readLightLevel();
+		led.setPWM(lux > 0 ? lux : 1);
+
+		if (_cfg->blinkColumn
+			&& (!_cfg->doNotBlink || !isTimeBetween(checkTime, _cfg->dnbFrom, _cfg->dnbTo - 1)))
+		{
+			led.showColumn(static_cast<bool>(_rtcPinState));
+		}
+		else
+		{
+			led.showColumn(false);
+		}
+
+		led.showTime(now, _cfg->leadingZero);
+	}
+	else if (_clockMode == CM_CONFIG)
+	{
+		led.showSsid(ESP.getChipId() % 100);
+	}
+	else if (_clockMode == CM_LOADING)
+	{
+		led.spin();
+	}
 }

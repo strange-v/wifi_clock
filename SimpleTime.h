@@ -3,69 +3,89 @@
 
 struct SimpleTime
 {
-	uint8_t hour;
-	uint8_t minute;
-
-	friend bool operator==(const SimpleTime& l, const SimpleTime& r)
+	SimpleTime(uint8_t hour, uint8_t minute)
 	{
-		return l.hour == r.hour && l.minute == r.minute;
+		_value = hour * 60 + minute;
 	}
 
-	friend bool operator!=(const SimpleTime& l, const SimpleTime& r)
+	SimpleTime(uint16_t minutes)
 	{
-		return !(l == r);
+		_value = minutes;
 	}
 
-	friend bool operator>(const SimpleTime& l, const SimpleTime& r)
+	SimpleTime()
 	{
-		return l.hour > r.hour || (l.hour == r.hour && l.minute > r.minute);
+		_value = 0;
 	}
 
-	friend bool operator<(const SimpleTime& l, const SimpleTime& r)
+	bool operator==(const SimpleTime& r)
 	{
-		return !(l > r) && l != r;
+		return _value == r._value;
+	}
+	bool operator!=(const SimpleTime& r)
+	{
+		return _value != r._value;
 	}
 
-	friend bool operator>=(const SimpleTime& l, const SimpleTime& r)
+	bool operator>(const SimpleTime& r)
 	{
-		return l == r || l > r;
+		return _value > r._value;
+	}
+	bool operator<(const SimpleTime& r)
+	{
+		return _value < r._value;
 	}
 
-	friend bool operator<=(const SimpleTime& l, const SimpleTime& r)
+	bool operator>=(const SimpleTime& r)
 	{
-		return l == r || l < r;
+		return _value >= r._value;
+	}
+	bool operator<=(const SimpleTime& r)
+	{
+		return _value <= r._value;
 	}
 
-	friend SimpleTime operator-(SimpleTime l, const uint16_t value)
+	SimpleTime operator-(const uint16_t value)
 	{
-		uint16_t minutes = l.hour * 60 + l.minute;
+		SimpleTime result(0);
 
-		if (value <= minutes)
+		if (value <= _value)
 		{
-			minutes -= value;
+			result._value = this->_value - value;
 		}
 		else
 		{
-			minutes = 1440 - (minutes - value);
+			result._value = 1440 - (this->_value - value);
 		}
 
-		l.hour = minutes / 60;
-		l.minute = minutes % 60;
-
-		return l;
+		return result;
 	}
-
-	friend SimpleTime operator+(SimpleTime l, const uint16_t value)
+	SimpleTime operator+(const uint16_t value)
 	{
-		uint32_t minutes = l.hour * 60 + l.minute;
-		minutes += value;
-		minutes = minutes % 1440;
+		SimpleTime result(0);
 
-		l.hour = minutes / 60;
-		l.minute = minutes % 60;
+		result._value = (this->_value + value) % 1440;
 
-		return l;
+		return result;
 	}
+
+	uint8_t hour()
+	{
+		return _value / 60;
+	}
+
+	uint8_t minute()
+	{
+		return _value % 60;
+	}
+
+	uint16_t getMinutes()
+	{
+		return _value;
+	}
+
+private:
+	uint16_t _value;
 };
 
 inline bool isTimeBetween(SimpleTime time, SimpleTime start, SimpleTime end)

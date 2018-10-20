@@ -57,8 +57,8 @@ void SettingsHelper::resetToDefaults()
 	setLeadingZero(true);
 	setBlinkColumn(true);
 	setDoNotBlink(true);
-	setDnbFrom({ 22, 0 });
-	setDnbTo({ 8, 0 });
+	setDnbFrom(SimpleTime(22, 0));
+	setDnbTo(SimpleTime(8, 0));
 	setMinBrightness(1);
 	setMaxBrightness(4095);
 
