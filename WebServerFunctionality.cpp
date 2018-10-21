@@ -3,8 +3,8 @@
 void initWebServer()
 {
 	server.on("/", HTTP_GET, handleRoot);
-	server.on("/config", HTTP_GET, getConfig);
-	server.on("/config", HTTP_POST, saveConfig);
+	server.on("/api/config", HTTP_GET, getConfig);
+	server.on("/api/config", HTTP_POST, saveConfig);
 	server.onNotFound(send404);
 	server.begin();
 }

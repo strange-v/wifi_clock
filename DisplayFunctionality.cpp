@@ -14,7 +14,8 @@ void updateDisplay()
 		SimpleTime checkTime(now.Hour(), now.Minute());
 
 		uint16_t lux = lightMeter.readLightLevel();
-		led.setPWM(lux > 0 ? lux : 1);
+		uint16_t pwm = map(lux, 0, 4000, _cfg->minBrightness, _cfg->maxBrightness);
+		led.setPWM(pwm);
 
 		if (_cfg->blinkColumn
 			&& (!_cfg->doNotBlink || !isTimeBetween(checkTime, _cfg->dnbFrom, _cfg->dnbTo - 1)))

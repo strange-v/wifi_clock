@@ -60,7 +60,7 @@ void SettingsHelper::resetToDefaults()
 	setDnbFrom(SimpleTime(22, 0));
 	setDnbTo(SimpleTime(8, 0));
 	setMinBrightness(1);
-	setMaxBrightness(4095);
+	setMaxBrightness(4000);
 
 	save();
 }
@@ -147,7 +147,7 @@ void SettingsHelper::setStartDst(TimeChangeRule value)
 
 void SettingsHelper::setEndDst(TimeChangeRule value)
 {
-	if (isEqual(value, _settings.endDST))
+	if (!isEqual(value, _settings.endDST))
 	{
 		EEPROM.put(offsetof(Settings, Settings::endDST), value);
 	}

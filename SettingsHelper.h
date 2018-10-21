@@ -4,7 +4,7 @@
 #include <Timezone.h>
 #include "SimpleTime.h"
 
-const uint32_t SETTINFS_SIGNATURE = 312657204l;
+const uint32_t SETTINFS_SIGNATURE = 312637204l;
 
 struct Settings
 {

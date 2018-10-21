@@ -14,7 +14,9 @@ void connectToNetwork(bool fallbackToAp)
 		printNetworkInfo();
 #endif
 		taskManager.StartTask(&taskDelayedSyncTime);
+#ifndef _DEBUG
 		taskManager.StartTask(&taskTurnOfNetwork);
+#endif
 	});
 
 	_connectToNetwork(fallbackToAp);

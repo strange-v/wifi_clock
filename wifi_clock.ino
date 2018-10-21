@@ -60,7 +60,7 @@ void setup()
 
 	SettingsHelper::init(256);
 	_cfg = SettingsHelper::get();
-	
+
 	ArduinoOTA.setPassword(_cfg->otaPwd);
 	ArduinoOTA.begin();
 
