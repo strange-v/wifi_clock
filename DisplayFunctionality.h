@@ -7,6 +7,7 @@
 #include <RtcDS3231.h>
 #include <BH1750.h>
 #include <TimeLib.h>
+#include <Timezone.h>
 #include "ClockMode.h"
 #include "SettingsHelper.h"
 #include "Led.h"
@@ -18,6 +19,7 @@ void updateDisplay();
 extern RtcDS3231<TwoWire> Rtc;
 extern BH1750 lightMeter;
 extern Led led;
+extern Timezone* timezone;
 
 extern Settings* _cfg;
 extern ClockMode _clockMode;

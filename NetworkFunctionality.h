@@ -7,7 +7,6 @@
 #include <Wire.h>
 #include <NTPClient.h>
 #include <RtcDS3231.h>
-#include <Timezone.h>
 #include <Task.h>
 #include "Cfg.h"
 #include "ClockMode.h"
@@ -36,7 +35,6 @@ extern unsigned long _connectionStart;
 extern uint32_t _lastTimeSync;
 extern NTPClient timeClient;
 extern RtcDS3231<TwoWire> Rtc;
-extern Timezone* timezone;
 extern Settings* _cfg;
 
 #endif

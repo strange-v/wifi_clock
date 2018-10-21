@@ -10,7 +10,9 @@ void updateDisplay()
 {
 	if (_clockMode == CM_CLOCK)
 	{
-		RtcDateTime now = Rtc.GetDateTime();
+		RtcDateTime utc = Rtc.GetDateTime();
+		time_t local = timezone->toLocal(utc);
+		RtcDateTime now = RtcDateTime(local);
 		SimpleTime checkTime(now.Hour(), now.Minute());
 
 		uint16_t lux = lightMeter.readLightLevel();

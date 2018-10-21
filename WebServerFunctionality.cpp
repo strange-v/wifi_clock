@@ -152,10 +152,7 @@ void saveConfig()
 	{
 		JsonObject& data = time["startDST"];
 		TimeChangeRule rule;
-
-		const char* abbrev = data["abbrev"];
-		memcpy(rule.abbrev, abbrev, strlen(abbrev) <= sizeof(rule.abbrev) ? strlen(abbrev) : sizeof(rule.abbrev));
-		
+		strcpy(rule.abbrev, "dst");
 		rule.week = data["week"];
 		rule.dow = data["dow"];
 		rule.month = data["month"];
@@ -168,10 +165,7 @@ void saveConfig()
 	{
 		JsonObject& data = time["endDST"];
 		TimeChangeRule rule;
-
-		const char* abbrev = data["abbrev"];
-		memcpy(rule.abbrev, abbrev, strlen(abbrev) <= sizeof(rule.abbrev) ? strlen(abbrev) : sizeof(rule.abbrev));
-
+		strcpy(rule.abbrev, "std");
 		rule.week = data["week"];
 		rule.dow = data["dow"];
 		rule.month = data["month"];
@@ -205,6 +199,9 @@ void saveConfig()
 
 	SettingsHelper::save();
 	server.send(200, APPLICATION_JSON, JSON_SUCCESS);
+	
+	delay(500);
+	ESP.restart();
 }
 
 bool isAuthenticated()

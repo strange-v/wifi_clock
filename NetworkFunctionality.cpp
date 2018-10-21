@@ -50,9 +50,8 @@ bool syncTime()
 	if (result)
 	{
 		unsigned long epoch = timeClient.getEpochTime();
-		time_t local = timezone->toLocal(epoch - 946684800l); //ToDo: Move this constatn to an appropriate place
-
-		RtcDateTime date = RtcDateTime(local);
+		RtcDateTime date = RtcDateTime(epoch - 946684800l); //ToDo: Move this constatn to an appropriate place
+		
 		Rtc.SetDateTime(date);
 		_lastTimeSync = Rtc.GetDateTime().TotalSeconds();
 		_clockMode = CM_CLOCK;
