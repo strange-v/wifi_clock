@@ -4,7 +4,7 @@
 #include <Timezone.h>
 #include "SimpleTime.h"
 
-const uint32_t SETTINFS_SIGNATURE = 312637204l;
+const uint32_t SETTINFS_SIGNATURE = 312647204l;
 
 struct Settings
 {
@@ -43,13 +43,13 @@ public:
 	static void save();
 	static void resetToDefaults();
 	
-	static void setWifiSsid(char *value);
-	static void setWifiPassword(char *value);
-	static void setAuthUser(char *value);
-	static void setAuthPassword(char *value);
-	static void setOtaPassword(char *value);
+	static void setWifiSsid(const char *value);
+	static void setWifiPassword(const char *value);
+	static void setAuthUser(const char *value);
+	static void setAuthPassword(const char *value);
+	static void setOtaPassword(const char *value);
 	
-	static void setNtpUrl(char *value);
+	static void setNtpUrl(const char *value);
 	static void setSyncPeriod(unsigned int value);
 	static void setUseDst(bool value);
 	static void setStartDst(TimeChangeRule value);
@@ -63,8 +63,8 @@ public:
 	static void setMinBrightness(unsigned int value);
 	static void setMaxBrightness(unsigned int value);
 private:
-	static void writeString(char *value, uint16_t addr, uint8_t len);
-	static void makeStringSafe(char *value, uint maxLen);
+	static void writeString(const char *value, uint16_t addr, uint8_t len);
+	static void makeSafeString(char *buffer, const char *value, uint maxLen);
 	static bool isEqual(TimeChangeRule a, TimeChangeRule b);
 
 	static Settings _settings;

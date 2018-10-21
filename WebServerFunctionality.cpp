@@ -43,7 +43,7 @@ void getConfig()
 	if (!isAuthenticated())
 		return;
 
-	StaticJsonBuffer<768> jb;
+	DynamicJsonBuffer jb(1042);
 	char buffer[768];
 
 	JsonObject& response = jb.createObject();
@@ -67,6 +67,7 @@ void getConfig()
 	time["useDST"] = _cfg->useDST;
 	JsonObject& startDST = time.createNestedObject("startDST");
 	TimeChangeRule dst = _cfg->startDST;
+	startDST["abbrev"] = dst.abbrev;
 	startDST["week"] = dst.week;
 	startDST["dow"] = dst.dow;
 	startDST["month"] = dst.month;
@@ -74,6 +75,7 @@ void getConfig()
 	startDST["offset"] = dst.offset;
 	JsonObject& endDST = time.createNestedObject("endDST");
 	TimeChangeRule std = _cfg->endDST;
+	endDST["abbrev"] = std.abbrev;
 	endDST["week"] = std.week;
 	endDST["dow"] = std.dow;
 	endDST["month"] = std.month;
@@ -93,7 +95,6 @@ void getConfig()
 	dnbTo["hour"] = _cfg->dnbTo.hour();
 	dnbTo["minute"] = _cfg->dnbTo.minute();
 
-	response.printTo(Serial);
 	response.printTo(buffer);
 	server.send(200, APPLICATION_JSON, buffer);
 }
@@ -103,7 +104,107 @@ void saveConfig()
 	if (!isAuthenticated())
 		return;
 
+	DynamicJsonBuffer jb(1042);
 
+	if (!server.hasArg("plain"))
+	{
+		server.send(200, APPLICATION_JSON, JSON_ERROR1);
+		return;
+	}
+
+	JsonObject& data = jb.parseObject(server.arg("plain"));
+	if (!data.success() || !data.containsKey("display") || !data.containsKey("system") || !data.containsKey("time"))
+	{
+		server.send(200, APPLICATION_JSON, JSON_ERROR2);
+		return;
+	}
+
+	JsonObject& system = data["system"];
+	JsonObject& time = data["time"];
+	JsonObject& display = data["display"];
+
+	//system
+	const char* wifiSSID = system["wifiSSID"];
+	if (wifiSSID != nullptr && !isStringEmpty(wifiSSID))
+		SettingsHelper::setWifiSsid(wifiSSID);
+	const char* wifiPwd = system["wifiPwd"];
+	if (wifiPwd != nullptr && !isStringEmpty(wifiPwd))
+		SettingsHelper::setWifiPassword(wifiPwd);
+	const char* authUser = system["authUser"];
+	if (authUser != nullptr && !isStringEmpty(authUser))
+		SettingsHelper::setAuthUser(authUser);
+	const char* authPwd = system["authPwd"];
+	if (authPwd != nullptr && !isStringEmpty(authPwd))
+		SettingsHelper::setAuthPassword(authPwd);
+	const char* otaPwd = system["otaPwd"];
+	if (otaPwd != nullptr && !isStringEmpty(otaPwd))
+		SettingsHelper::setOtaPassword(otaPwd);
+
+	//time
+	const char* ntpUrl = time["ntpUrl"];
+	if (ntpUrl != nullptr && !isStringEmpty(ntpUrl))
+		SettingsHelper::setNtpUrl(ntpUrl);
+	if (time.containsKey("syncPeriod"))
+		SettingsHelper::setSyncPeriod(time["syncPeriod"].as<int>());
+	if (time.containsKey("useDST"))
+		SettingsHelper::setUseDst(time["useDST"].as<bool>());
+	if (time.containsKey("startDST"))
+	{
+		JsonObject& data = time["startDST"];
+		TimeChangeRule rule;
+
+		const char* abbrev = data["abbrev"];
+		memcpy(rule.abbrev, abbrev, strlen(abbrev) <= sizeof(rule.abbrev) ? strlen(abbrev) : sizeof(rule.abbrev));
+		
+		rule.week = data["week"];
+		rule.dow = data["dow"];
+		rule.month = data["month"];
+		rule.hour = data["hour"];
+		rule.offset = data["offset"];
+
+		SettingsHelper::setStartDst(rule);
+	}
+	if (time.containsKey("endDST"))
+	{
+		JsonObject& data = time["endDST"];
+		TimeChangeRule rule;
+
+		const char* abbrev = data["abbrev"];
+		memcpy(rule.abbrev, abbrev, strlen(abbrev) <= sizeof(rule.abbrev) ? strlen(abbrev) : sizeof(rule.abbrev));
+
+		rule.week = data["week"];
+		rule.dow = data["dow"];
+		rule.month = data["month"];
+		rule.hour = data["hour"];
+		rule.offset = data["offset"];
+
+		SettingsHelper::setEndDst(rule);
+	}
+
+	//display
+	if (display.containsKey("leadingZero"))
+		SettingsHelper::setLeadingZero(display["leadingZero"].as<bool>());
+	if (display.containsKey("blinkColumn"))
+		SettingsHelper::setBlinkColumn(display["blinkColumn"].as<bool>());
+	if (display.containsKey("doNotBlink"))
+		SettingsHelper::setDoNotBlink(display["doNotBlink"].as<bool>());
+	if (display.containsKey("minBrightness"))
+		SettingsHelper::setMinBrightness(display["minBrightness"].as<unsigned int>());
+	if (display.containsKey("maxBrightness"))
+		SettingsHelper::setMaxBrightness(display["maxBrightness"].as<unsigned int>());
+	if (display.containsKey("dnbFrom"))
+	{
+		JsonObject& data = display["dnbFrom"];
+		SettingsHelper::setDnbFrom(SimpleTime(data["hour"].as<uint8_t>(), data["minute"].as<uint8_t>()));
+	}
+	if (display.containsKey("dnbTo"))
+	{
+		JsonObject& data = display["dnbTo"];
+		SettingsHelper::setDnbTo(SimpleTime(data["hour"].as<uint8_t>(), data["minute"].as<uint8_t>()));
+	}
+
+	SettingsHelper::save();
+	server.send(200, APPLICATION_JSON, JSON_SUCCESS);
 }
 
 bool isAuthenticated()
@@ -117,4 +218,9 @@ bool isAuthenticated()
 		server.requestAuthentication();
 		return false;
 	}
+}
+
+bool isStringEmpty(const char* value)
+{
+	return value[0] == '\0';
 }

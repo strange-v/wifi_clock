@@ -66,45 +66,60 @@ void SettingsHelper::resetToDefaults()
 }
 
 #pragma region System
-void SettingsHelper::setWifiSsid(char *value)
+void SettingsHelper::setWifiSsid(const char *value)
 {
-	makeStringSafe(value, sizeof(Settings::wifiSSID));
+	const byte maxLen = sizeof(Settings::wifiSSID);
+	char buffer[maxLen];
+
+	makeSafeString(buffer, value, maxLen);
 	if (strcmp(value, _settings.wifiSSID) != 0)
 	{
 		writeString(value, offsetof(Settings, Settings::wifiSSID), strlen(value) + 1);
 	}
 }
 
-void SettingsHelper::setWifiPassword(char *value)
+void SettingsHelper::setWifiPassword(const char *value)
 {
-	makeStringSafe(value, sizeof(Settings::wifiPwd));
+	const byte maxLen = sizeof(Settings::wifiPwd);
+	char buffer[maxLen];
+
+	makeSafeString(buffer, value, maxLen);
 	if (strcmp(value, _settings.wifiPwd) != 0)
 	{
 		writeString(value, offsetof(Settings, Settings::wifiPwd), strlen(value) + 1);
 	}
 }
 
-void SettingsHelper::setAuthUser(char *value)
+void SettingsHelper::setAuthUser(const char *value)
 {
-	makeStringSafe(value, sizeof(Settings::authUser));
+	const byte maxLen = sizeof(Settings::authUser);
+	char buffer[maxLen];
+
+	makeSafeString(buffer, value, maxLen);
 	if (strcmp(value, _settings.authUser) != 0)
 	{
 		writeString(value, offsetof(Settings, Settings::authUser), strlen(value) + 1);
 	}
 }
 
-void SettingsHelper::setAuthPassword(char *value)
+void SettingsHelper::setAuthPassword(const char *value)
 {
-	makeStringSafe(value, sizeof(Settings::authPwd));
+	const byte maxLen = sizeof(Settings::authPwd);
+	char buffer[maxLen];
+
+	makeSafeString(buffer, value, maxLen);
 	if (strcmp(value, _settings.authPwd) != 0)
 	{
 		writeString(value, offsetof(Settings, Settings::authPwd), strlen(value) + 1);
 	}
 }
 
-void SettingsHelper::setOtaPassword(char *value)
+void SettingsHelper::setOtaPassword(const char *value)
 {
-	makeStringSafe(value, sizeof(Settings::otaPwd));
+	const byte maxLen = sizeof(Settings::otaPwd);
+	char buffer[maxLen];
+
+	makeSafeString(buffer, value, maxLen);
 	if (strcmp(value, _settings.otaPwd) != 0)
 	{
 		writeString(value, offsetof(Settings, Settings::otaPwd), strlen(value) + 1);
@@ -112,9 +127,12 @@ void SettingsHelper::setOtaPassword(char *value)
 }
 #pragma endregion
 #pragma region Time
-void SettingsHelper::setNtpUrl(char *value)
+void SettingsHelper::setNtpUrl(const char *value)
 {
-	makeStringSafe(value, sizeof(Settings::ntpUrl));
+	const byte maxLen = sizeof(Settings::ntpUrl);
+	char buffer[maxLen];
+
+	makeSafeString(buffer, value, maxLen);
 	if (strcmp(value, _settings.ntpUrl) != 0)
 	{
 		writeString(value, offsetof(Settings, Settings::ntpUrl), strlen(value) + 1);
@@ -211,7 +229,7 @@ void SettingsHelper::setMaxBrightness(unsigned int value)
 }
 #pragma endregion
 
-void SettingsHelper::writeString(char *value, uint16_t addr, uint8_t len)
+void SettingsHelper::writeString(const char *value, uint16_t addr, uint8_t len)
 {
 	for (int i = 0; i < len; i++)
 	{
@@ -219,12 +237,14 @@ void SettingsHelper::writeString(char *value, uint16_t addr, uint8_t len)
 	}
 }
 
-void SettingsHelper::makeStringSafe(char *value, uint maxLen)
+void SettingsHelper::makeSafeString(char *buffer, const char *value, uint maxLen)
 {
-	uint len = strlen(value);
+	memcpy(buffer, value, maxLen);
+
+	uint len = strlen(buffer);
 	if (len >= maxLen)
 	{
-		value[maxLen - 1] = '\0';
+		buffer[maxLen - 1] = '\0';
 	}
 }
 

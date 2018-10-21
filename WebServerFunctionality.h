@@ -20,6 +20,7 @@ void send404();
 void getConfig();
 void saveConfig();
 bool isAuthenticated();
+bool isStringEmpty(const char* value);
 
 
 extern ESP8266WebServer server;
