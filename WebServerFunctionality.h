@@ -6,6 +6,7 @@
 #include <FS.h>
 #include <Task.h>
 #include <ESP8266WebServer.h>
+#include <NTPClient.h>
 #include <ArduinoJson.h>
 #include "Module.h"
 #include "WebServerConstants.h"
@@ -26,6 +27,9 @@ bool isStringEmpty(const char* value);
 extern ESP8266WebServer server;
 extern TaskManager taskManager;
 extern FunctionTask taskTurnOfNetwork;
+extern FunctionTask taskScheduledSyncTime;
+extern NTPClient timeClient;
+extern Timezone* timezone;
 extern Settings* _cfg;
 
 #endif

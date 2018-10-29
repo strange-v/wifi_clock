@@ -11,7 +11,7 @@ void updateDisplay()
 	if (_clockMode == CM_CLOCK)
 	{
 		RtcDateTime utc = Rtc.GetDateTime();
-		time_t local = timezone->toLocal(utc);
+		time_t local = timezone->toLocal(utc + 946684800UL); //ToDo: Move this constatn to an appropriate place
 		RtcDateTime now = RtcDateTime(local);
 		SimpleTime checkTime(now.Hour(), now.Minute());
 

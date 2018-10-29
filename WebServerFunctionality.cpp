@@ -112,96 +112,136 @@ void saveConfig()
 		return;
 	}
 
-	JsonObject& data = jb.parseObject(server.arg("plain"));
-	if (!data.success() || !data.containsKey("display") || !data.containsKey("system") || !data.containsKey("time"))
+	JsonObject& root = jb.parseObject(server.arg("plain"));
+	if (!root.success() || !root.containsKey("display") || !root.containsKey("system") || !root.containsKey("time"))
 	{
 		server.send(200, APPLICATION_JSON, JSON_ERROR2);
 		return;
 	}
 
-	JsonObject& system = data["system"];
-	JsonObject& time = data["time"];
-	JsonObject& display = data["display"];
+	bool restartRequired = false;
 
-	//system
-	const char* wifiSSID = system["wifiSSID"];
-	if (wifiSSID != nullptr && !isStringEmpty(wifiSSID))
-		SettingsHelper::setWifiSsid(wifiSSID);
-	const char* wifiPwd = system["wifiPwd"];
-	if (wifiPwd != nullptr && !isStringEmpty(wifiPwd))
-		SettingsHelper::setWifiPassword(wifiPwd);
-	const char* authUser = system["authUser"];
-	if (authUser != nullptr && !isStringEmpty(authUser))
-		SettingsHelper::setAuthUser(authUser);
-	const char* authPwd = system["authPwd"];
-	if (authPwd != nullptr && !isStringEmpty(authPwd))
-		SettingsHelper::setAuthPassword(authPwd);
-	const char* otaPwd = system["otaPwd"];
-	if (otaPwd != nullptr && !isStringEmpty(otaPwd))
-		SettingsHelper::setOtaPassword(otaPwd);
-
-	//time
-	const char* ntpUrl = time["ntpUrl"];
-	if (ntpUrl != nullptr && !isStringEmpty(ntpUrl))
-		SettingsHelper::setNtpUrl(ntpUrl);
-	if (time.containsKey("syncPeriod"))
-		SettingsHelper::setSyncPeriod(time["syncPeriod"].as<int>());
-	if (time.containsKey("useDST"))
-		SettingsHelper::setUseDst(time["useDST"].as<bool>());
-	if (time.containsKey("startDST"))
+	JsonObject& system = root["system"];
+	const char* system_wifiSSID = system["wifiSSID"];
+	const char* system_wifiPwd = system["wifiPwd"];
+	const char* system_authUser = system["authUser"];
+	const char* system_authPwd = system["authPwd"];
+	const char* system_otaPwd = system["otaPwd"];
+	if (system_wifiSSID != nullptr && !isStringEmpty(system_wifiSSID) && strcmp(system_wifiSSID, _cfg->wifiSSID) != 0)
 	{
-		JsonObject& data = time["startDST"];
-		TimeChangeRule rule;
-		strcpy(rule.abbrev, "dst");
-		rule.week = data["week"];
-		rule.dow = data["dow"];
-		rule.month = data["month"];
-		rule.hour = data["hour"];
-		rule.offset = data["offset"];
-
-		SettingsHelper::setStartDst(rule);
+		SettingsHelper::setWifiSsid(system_wifiSSID);
+		restartRequired = true;
 	}
-	if (time.containsKey("endDST"))
+	if (system_wifiPwd != nullptr && !isStringEmpty(system_wifiPwd) && strcmp(system_wifiPwd, _cfg->wifiPwd) != 0)
 	{
-		JsonObject& data = time["endDST"];
-		TimeChangeRule rule;
-		strcpy(rule.abbrev, "std");
-		rule.week = data["week"];
-		rule.dow = data["dow"];
-		rule.month = data["month"];
-		rule.hour = data["hour"];
-		rule.offset = data["offset"];
-
-		SettingsHelper::setEndDst(rule);
+		SettingsHelper::setWifiPassword(system_wifiPwd);
+		restartRequired = true;
+	}
+	if (system_authUser != nullptr && !isStringEmpty(system_authUser) && strcmp(system_authUser, _cfg->authUser) != 0)
+	{
+		SettingsHelper::setAuthUser(system_authUser);
+		restartRequired = true;
+	}
+	if (system_authPwd != nullptr && !isStringEmpty(system_authPwd) && strcmp(system_authPwd, _cfg->authPwd) != 0)
+	{
+		SettingsHelper::setAuthPassword(system_authPwd);
+		restartRequired = true;
+	}
+	if (system_otaPwd != nullptr && !isStringEmpty(system_otaPwd) && strcmp(system_otaPwd, _cfg->otaPwd) != 0)
+	{
+		SettingsHelper::setOtaPassword(system_otaPwd);
+		restartRequired = true;
 	}
 
-	//display
-	if (display.containsKey("leadingZero"))
-		SettingsHelper::setLeadingZero(display["leadingZero"].as<bool>());
-	if (display.containsKey("blinkColumn"))
-		SettingsHelper::setBlinkColumn(display["blinkColumn"].as<bool>());
-	if (display.containsKey("doNotBlink"))
-		SettingsHelper::setDoNotBlink(display["doNotBlink"].as<bool>());
-	if (display.containsKey("minBrightness"))
-		SettingsHelper::setMinBrightness(display["minBrightness"].as<unsigned int>());
-	if (display.containsKey("maxBrightness"))
-		SettingsHelper::setMaxBrightness(display["maxBrightness"].as<unsigned int>());
-	if (display.containsKey("dnbFrom"))
+	JsonObject& time = root["time"];
+	const char* time_ntpUrl = time["ntpUrl"];
+	int time_syncPeriod = time["syncPeriod"];
+	bool time_useDST = time["useDST"];
+	if (time_ntpUrl != nullptr && !isStringEmpty(time_ntpUrl) && strcmp(time_ntpUrl, _cfg->ntpUrl) != 0)
 	{
-		JsonObject& data = display["dnbFrom"];
-		SettingsHelper::setDnbFrom(SimpleTime(data["hour"].as<uint8_t>(), data["minute"].as<uint8_t>()));
+		SettingsHelper::setNtpUrl(time_ntpUrl);
+		timeClient.setPoolServerName(time_ntpUrl);
 	}
-	if (display.containsKey("dnbTo"))
+	if (time_syncPeriod > 0 && time_syncPeriod != _cfg->syncPeriod)
 	{
-		JsonObject& data = display["dnbTo"];
-		SettingsHelper::setDnbTo(SimpleTime(data["hour"].as<uint8_t>(), data["minute"].as<uint8_t>()));
+		SettingsHelper::setSyncPeriod(time_syncPeriod);
+		taskScheduledSyncTime.setTimeInterval(_cfg->syncPeriod * 60 * 1000ul);
+	}
+
+	JsonObject& time_startDST = time["startDST"];
+	uint8_t time_startDST_week = time_startDST["week"];
+	uint8_t time_startDST_dow = time_startDST["dow"];
+	uint8_t time_startDST_month = time_startDST["month"];
+	uint8_t time_startDST_hour = time_startDST["hour"];
+	int time_startDST_offset = time_startDST["offset"];
+	TimeChangeRule dst = { "dst", time_startDST_week, time_startDST_dow, time_startDST_month, time_startDST_hour, time_startDST_offset };
+
+	JsonObject& time_endDST = time["endDST"];
+	uint8_t time_endDST_week = time_endDST["week"];
+	uint8_t time_endDST_dow = time_endDST["dow"];
+	uint8_t time_endDST_month = time_endDST["month"];
+	uint8_t time_endDST_hour = time_endDST["hour"];
+	uint8_t time_endDST_offset = time_endDST["offset"];
+	TimeChangeRule std = { "std", time_endDST_week, time_endDST_dow, time_endDST_month, time_endDST_hour, time_endDST_offset };
+
+	if (!SettingsHelper::isEqual(dst, _cfg->startDST) || !SettingsHelper::isEqual(std, _cfg->endDST))
+	{
+		SettingsHelper::setStartDst(dst);
+		SettingsHelper::setEndDst(std);
+		timezone->setRules(dst, std);
+	}
+
+	JsonObject& display = root["display"];
+	bool display_leadingZero = display["leadingZero"];
+	bool display_blinkColumn = display["blinkColumn"];
+	bool display_doNotBlink = display["doNotBlink"];
+	int display_minBrightness = display["minBrightness"];
+	int display_maxBrightness = display["maxBrightness"];
+	if (display_leadingZero != _cfg->leadingZero)
+	{
+		SettingsHelper::setLeadingZero(display_leadingZero);
+	}
+	if (display_blinkColumn != _cfg->blinkColumn)
+	{
+		SettingsHelper::setBlinkColumn(display_blinkColumn);
+	}
+	if (display_doNotBlink != _cfg->doNotBlink)
+	{
+		SettingsHelper::setDoNotBlink(display_doNotBlink);
+	}
+	if (display_minBrightness != _cfg->minBrightness)
+	{
+		SettingsHelper::setMinBrightness(display_minBrightness);
+	}
+	if (display_maxBrightness != _cfg->maxBrightness)
+	{
+		SettingsHelper::setMaxBrightness(display_maxBrightness);
+	}
+
+	uint8_t display_dnbFrom_hour = display["dnbFrom"]["hour"];
+	uint8_t display_dnbFrom_minute = display["dnbFrom"]["minute"];
+	SimpleTime dnbFrom(display_dnbFrom_hour, display_dnbFrom_minute);
+	if (dnbFrom != _cfg->dnbFrom)
+	{
+		SettingsHelper::setDnbFrom(dnbFrom);
+	}
+
+	int display_dnbTo_hour = display["dnbTo"]["hour"];
+	int display_dnbTo_minute = display["dnbTo"]["minute"];
+	SimpleTime dnbTo(display_dnbTo_hour, display_dnbTo_minute);
+	if (dnbTo != _cfg->dnbTo)
+	{
+		SettingsHelper::setDnbTo(dnbTo);
 	}
 
 	SettingsHelper::save();
 	server.send(200, APPLICATION_JSON, JSON_SUCCESS);
 	
-	delay(500);
-	ESP.restart();
+	if (restartRequired)
+	{
+		delay(500);
+		ESP.restart();
+	}
 }
 
 bool isAuthenticated()

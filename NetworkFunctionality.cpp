@@ -50,7 +50,7 @@ bool syncTime()
 	if (result)
 	{
 		unsigned long epoch = timeClient.getEpochTime();
-		RtcDateTime date = RtcDateTime(epoch - 946684800l); //ToDo: Move this constatn to an appropriate place
+		RtcDateTime date = RtcDateTime(epoch - 946684800UL); //ToDo: Move this constatn to an appropriate place
 		
 		Rtc.SetDateTime(date);
 		_lastTimeSync = Rtc.GetDateTime().TotalSeconds();

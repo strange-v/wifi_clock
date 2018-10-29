@@ -62,10 +62,11 @@ public:
 	static void setDnbTo(SimpleTime value);
 	static void setMinBrightness(unsigned int value);
 	static void setMaxBrightness(unsigned int value);
+
+	static bool isEqual(TimeChangeRule a, TimeChangeRule b);
 private:
 	static void writeString(const char *value, uint16_t addr, uint8_t len);
 	static void makeSafeString(char *buffer, const char *value, uint maxLen);
-	static bool isEqual(TimeChangeRule a, TimeChangeRule b);
 
 	static Settings _settings;
 };
