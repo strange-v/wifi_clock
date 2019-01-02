@@ -61,6 +61,8 @@ void setup()
 	SettingsHelper::init(256);
 	_cfg = SettingsHelper::get();
 
+	taskScheduledSyncTime.setTimeInterval(_cfg->syncPeriod * 60ul * 1000ul);
+
 	ArduinoOTA.setPassword(_cfg->otaPwd);
 	ArduinoOTA.begin();
 

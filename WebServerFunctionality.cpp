@@ -5,6 +5,7 @@ void initWebServer()
 	server.on("/", HTTP_GET, handleRoot);
 	server.on("/api/config", HTTP_GET, getConfig);
 	server.on("/api/config", HTTP_POST, saveConfig);
+	server.serveStatic("/static", SPIFFS, "/static");
 	server.onNotFound(send404);
 	server.begin();
 }
@@ -56,10 +57,10 @@ void getConfig()
 
 	JsonObject& system = entity.createNestedObject("system");
 	system["wifiSSID"] = _cfg->wifiSSID;
-	system["wifiPwd"] = "     ";
+	system["wifiPwd"] = "";
 	system["authUser"] = _cfg->authUser;
-	system["authPwd"] = "     ";
-	system["otaPwd"] = "     ";
+	system["authPwd"] = "";
+	system["otaPwd"] = "";
 
 	JsonObject& time = entity.createNestedObject("time");
 	time["ntpUrl"] = _cfg->ntpUrl;
