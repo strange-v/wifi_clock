@@ -13,7 +13,7 @@
 #include "Led.h"
 #include "Cfg.h"
 
-void rtcInterrupt();
+void ICACHE_RAM_ATTR rtcInterrupt();
 void updateDisplay();
 
 extern RtcDS3231<TwoWire> Rtc;

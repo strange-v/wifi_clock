@@ -1,6 +1,6 @@
 #include "DisplayFunctionality.h"
 
-void rtcInterrupt()
+void ICACHE_RAM_ATTR rtcInterrupt()
 {
 	_rtcPinState = digitalRead(Cfg::pinRtcInt);
 	_updateDisplay++;

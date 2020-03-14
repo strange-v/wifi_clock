@@ -6,6 +6,7 @@ void initWebServer()
 	server.on("/api/config", HTTP_GET, getConfig);
 	server.on("/api/config", HTTP_POST, saveConfig);
 	server.serveStatic("/static", SPIFFS, "/static");
+	server.serveStatic("/assets", SPIFFS, "/assets");
 	server.onNotFound(send404);
 	server.begin();
 }
@@ -66,6 +67,7 @@ void getConfig()
 	time["ntpUrl"] = _cfg->ntpUrl;
 	time["syncPeriod"] = _cfg->syncPeriod;
 	time["useDST"] = _cfg->useDST;
+	time["offset"] = _cfg->offset;
 	JsonObject& startDST = time.createNestedObject("startDST");
 	TimeChangeRule dst = _cfg->startDST;
 	startDST["abbrev"] = dst.abbrev;
@@ -156,8 +158,9 @@ void saveConfig()
 
 	JsonObject& time = root["time"];
 	const char* time_ntpUrl = time["ntpUrl"];
-	int time_syncPeriod = time["syncPeriod"];
+	unsigned int time_syncPeriod = time["syncPeriod"];
 	bool time_useDST = time["useDST"];
+	int offset = time["offset"];
 	if (time_ntpUrl != nullptr && !isStringEmpty(time_ntpUrl) && strcmp(time_ntpUrl, _cfg->ntpUrl) != 0)
 	{
 		SettingsHelper::setNtpUrl(time_ntpUrl);
@@ -168,22 +171,45 @@ void saveConfig()
 		SettingsHelper::setSyncPeriod(time_syncPeriod);
 		taskScheduledSyncTime.setTimeInterval(_cfg->syncPeriod * 60 * 1000ul);
 	}
+	if (offset <= 14 * 60 || offset >= -12 * 60)
+	{
+		SettingsHelper::setOffset(offset);
+	}
+	else
+	{
+		offset = 0;
+		SettingsHelper::setOffset(offset);
+	}
+	
 
-	JsonObject& time_startDST = time["startDST"];
-	uint8_t time_startDST_week = time_startDST["week"];
-	uint8_t time_startDST_dow = time_startDST["dow"];
-	uint8_t time_startDST_month = time_startDST["month"];
-	uint8_t time_startDST_hour = time_startDST["hour"];
-	int time_startDST_offset = time_startDST["offset"];
-	TimeChangeRule dst = { "dst", time_startDST_week, time_startDST_dow, time_startDST_month, time_startDST_hour, time_startDST_offset };
+	TimeChangeRule dst = { "dst", First, 1, 1, 1, offset };
+	TimeChangeRule std = { "std", First, 1, 1, 1, offset };
+	if (time_useDST)
+	{
+		JsonObject& time_startDST = time["startDST"];
+		uint8_t time_startDST_week = time_startDST["week"];
+		uint8_t time_startDST_dow = time_startDST["dow"];
+		uint8_t time_startDST_month = time_startDST["month"];
+		uint8_t time_startDST_hour = time_startDST["hour"];
+		dst.week = time_startDST_week;
+		dst.dow = time_startDST_dow;
+		dst.month = time_startDST_month;
+		dst.hour = time_startDST_hour;
+		dst.offset = offset + 60;
+		//dst = { "dst", time_startDST_week, time_startDST_dow, time_startDST_month, time_startDST_hour, offset + 60 };
 
-	JsonObject& time_endDST = time["endDST"];
-	uint8_t time_endDST_week = time_endDST["week"];
-	uint8_t time_endDST_dow = time_endDST["dow"];
-	uint8_t time_endDST_month = time_endDST["month"];
-	uint8_t time_endDST_hour = time_endDST["hour"];
-	uint8_t time_endDST_offset = time_endDST["offset"];
-	TimeChangeRule std = { "std", time_endDST_week, time_endDST_dow, time_endDST_month, time_endDST_hour, time_endDST_offset };
+		JsonObject& time_endDST = time["endDST"];
+		uint8_t time_endDST_week = time_endDST["week"];
+		uint8_t time_endDST_dow = time_endDST["dow"];
+		uint8_t time_endDST_month = time_endDST["month"];
+		uint8_t time_endDST_hour = time_endDST["hour"];
+		std.week = time_endDST_week;
+		std.dow = time_endDST_dow;
+		std.month = time_endDST_month;
+		std.hour = time_endDST_hour;
+		std.offset = offset;
+		//std = { "std", time_endDST_week, time_endDST_dow, time_endDST_month, time_endDST_hour, offset };
+	}
 
 	if (!SettingsHelper::isEqual(dst, _cfg->startDST) || !SettingsHelper::isEqual(std, _cfg->endDST))
 	{

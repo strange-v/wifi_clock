@@ -39,8 +39,8 @@ void SettingsHelper::save()
 
 void SettingsHelper::resetToDefaults()
 {
-	TimeChangeRule dst = { "DST", Last, Sun, Mar, 3, 180 };
-	TimeChangeRule std = { "STD", Last, Sun, Oct, 4, 120 };
+	TimeChangeRule dst = { "DST", Last, Sun, Mar, 3, 0 };
+	TimeChangeRule std = { "STD", Last, Sun, Oct, 4, 0 };
 
 	setWifiSsid("SSID");
 	setWifiPassword("PWD");
@@ -51,6 +51,7 @@ void SettingsHelper::resetToDefaults()
 	setNtpUrl("pool.ntp.org");
 	setSyncPeriod(300);
 	setUseDst(true);
+	setOffset(120);
 	setStartDst(dst);
 	setEndDst(std);
 
@@ -152,6 +153,14 @@ void SettingsHelper::setUseDst(bool value)
 	if (value != _settings.useDST)
 	{
 		EEPROM.put(offsetof(Settings, Settings::useDST), value);
+	}
+}
+
+void SettingsHelper::setOffset(int value)
+{
+	if (value != _settings.offset)
+	{
+		EEPROM.put(offsetof(Settings, Settings::offset), value);
 	}
 }
 

@@ -4,7 +4,7 @@
 #include <Timezone.h>
 #include "SimpleTime.h"
 
-const uint32_t SETTINFS_SIGNATURE = 312647204l;
+const uint32_t SETTINFS_SIGNATURE = 312647205l;
 
 struct Settings
 {
@@ -20,6 +20,7 @@ struct Settings
 	char ntpUrl[32];
 	unsigned int syncPeriod;
 	bool useDST;
+	int offset;
 	TimeChangeRule startDST;
 	TimeChangeRule endDST;
 #pragma endregion
@@ -52,6 +53,7 @@ public:
 	static void setNtpUrl(const char *value);
 	static void setSyncPeriod(unsigned int value);
 	static void setUseDst(bool value);
+	static void setOffset(int value);
 	static void setStartDst(TimeChangeRule value);
 	static void setEndDst(TimeChangeRule value);
 

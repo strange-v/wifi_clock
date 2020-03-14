@@ -37,6 +37,8 @@ void startSoftAP()
 	_connectionState = CS_ACCESS_POINT;
 	_clockMode = CM_CONFIG;
 
+	initWebServer();
+
 #ifdef _DEBUG
 	IPAddress myIP = WiFi.softAPIP();
 	Serial.print(F("AP IP address: "));
