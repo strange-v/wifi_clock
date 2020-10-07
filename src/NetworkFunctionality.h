@@ -14,7 +14,16 @@
 #include "Module.h"
 #include "WebServerFunctionality.h"
 
-enum ConnectionState { CS_DISCONNECTED, CS_CONNECTING, CS_CONNECTING_W_AP, CS_CONNECTED, CS_STARTING_ACCESS_POINT, CS_ACCESS_POINT, CS_DISCONNECTING };
+enum ConnectionState
+{
+    CS_DISCONNECTED,
+    CS_CONNECTING,
+    CS_CONNECTING_W_AP,
+    CS_CONNECTED,
+    CS_STARTING_ACCESS_POINT,
+    CS_ACCESS_POINT,
+    CS_DISCONNECTING
+};
 
 void connectToNetwork(bool fallbackToAp);
 void startSoftAP();
@@ -31,11 +40,11 @@ extern FunctionTask taskCheckConnection, taskTurnOfNetwork, taskDelayedSyncTime,
 extern WiFiEventHandler ehNetworkConnected, ehNetworkDisconnected;
 extern ConnectionState _connectionState;
 extern ClockMode _clockMode;
+extern bool _isRtcOk;
 extern unsigned long _connectionStart;
 extern uint32_t _lastTimeSync;
 extern NTPClient timeClient;
 extern RtcDS3231<TwoWire> Rtc;
-extern Settings* _cfg;
+extern Settings *_cfg;
 
 #endif
-

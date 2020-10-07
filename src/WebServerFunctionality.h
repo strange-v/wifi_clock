@@ -13,7 +13,6 @@
 #include "SettingsHelper.h"
 #include "Cfg.h"
 
-
 void initWebServer();
 void stopWebServer();
 void handleRoot();
@@ -21,16 +20,14 @@ void send404();
 void getConfig();
 void saveConfig();
 bool isAuthenticated();
-bool isStringEmpty(const char* value);
-
+bool isStringEmpty(const char *value);
 
 extern ESP8266WebServer server;
 extern TaskManager taskManager;
 extern FunctionTask taskTurnOfNetwork;
 extern FunctionTask taskScheduledSyncTime;
 extern NTPClient timeClient;
-extern Timezone* timezone;
-extern Settings* _cfg;
+extern Timezone *timezone;
+extern Settings *_cfg;
 
 #endif
-

@@ -13,5 +13,5 @@ namespace Cfg
 	const byte pinOe = 12;
 	const byte pinRtcInt = 14;
 
-	const char version[] = "1.1.0";
+	const char version[] = "1.1.1";
 }

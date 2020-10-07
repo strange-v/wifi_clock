@@ -1,8 +1,8 @@
-#include "WebServerFunctionality.h"
+#include <Arduino.h>
+#include <ArduinoOTA.h>
 #include <ESP8266WiFi.h>
 #include <WiFiUdp.h>
 #include <FS.h>
-#include <ArduinoOTA.h>
 #include <Task.h>
 #include <NTPClient.h>
 #include <Wire.h>
@@ -18,9 +18,10 @@
 #include "Led.h"
 #include "NetworkFunctionality.h"
 #include "DisplayFunctionality.h"
+#include "WebServerFunctionality.h"
 
 TaskManager taskManager;
-FunctionTask taskCheckConnection(_checkConnection, MsToTaskTime(5 *1000));
+FunctionTask taskCheckConnection(_checkConnection, MsToTaskTime(5 * 1000));
 FunctionTask taskTurnOfNetwork(_turnOfNetwork, MsToTaskTime(2 * 60 * 1000));
 FunctionTask taskDelayedSyncTime(_delayedSyncTime, MsToTaskTime(15 * 1000));
 FunctionTask taskScheduledSyncTime(_scheduledSyncTime, MsToTaskTime(5 * 60 * 60 * 1000ul));
@@ -31,12 +32,13 @@ NTPClient timeClient(ntpUDP);
 BH1750 lightMeter;
 RtcDS3231<TwoWire> Rtc(Wire);
 Led led(&Wire, Cfg::pinOe);
-Timezone* timezone;
+Timezone *timezone;
 ESP8266WebServer server(80);
 
-Settings* _cfg;
+Settings *_cfg;
 ConnectionState _connectionState = CS_DISCONNECTED;
 ClockMode _clockMode = CM_LOADING;
+bool _isRtcOk = false;
 unsigned long _connectionStart = 0;
 volatile byte _rtcPinState = LOW;
 volatile byte _updateDisplay = 0;
@@ -46,7 +48,7 @@ unsigned long _testTime = 0;
 void setup()
 {
 	Serial.begin(115200);
-#ifdef _DEBUG
+#ifdef CL_DEBUG
 	delay(3000);
 	printModuleInfo();
 #endif
@@ -61,8 +63,6 @@ void setup()
 	SettingsHelper::init(256);
 	_cfg = SettingsHelper::get();
 
-	taskScheduledSyncTime.setTimeInterval(_cfg->syncPeriod * 60ul * 1000ul);
-
 	ArduinoOTA.setPassword(_cfg->otaPwd);
 	ArduinoOTA.begin();
 
@@ -72,7 +72,7 @@ void setup()
 	led.begin();
 
 	bool lightMeterState = lightMeter.begin();
-#ifdef _DEBUG
+#ifdef CL_DEBUG
 	if (lightMeterState)
 		Serial.println(F("BH1750 initialized"));
 	else
@@ -84,13 +84,14 @@ void setup()
 	Rtc.SetSquareWavePinClockFrequency(DS3231SquareWaveClock_1Hz);
 	if (Rtc.IsDateTimeValid() && Rtc.GetIsRunning())
 	{
+		_isRtcOk = true;
 		_clockMode = CM_CLOCK;
 	}
 	else
 	{
 		if (!Rtc.IsDateTimeValid())
 		{
-#ifdef _DEBUG
+#ifdef CL_DEBUG
 			Serial.println(F("RTC lost confidence in the DateTime!"));
 #endif
 			Rtc.SetDateTime(0);
@@ -98,12 +99,12 @@ void setup()
 
 		if (!Rtc.GetIsRunning())
 		{
-#ifdef _DEBUG
+#ifdef CL_DEBUG
 			Serial.println(F("RTC was not actively running, starting now"));
 #endif
 			Rtc.SetIsRunning(true);
 		}
-	}	
+	}
 
 	timezone = new Timezone(_cfg->startDST, _cfg->endDST);
 	timeClient.begin();
@@ -115,6 +116,22 @@ void setup()
 	attachInterrupt(digitalPinToInterrupt(Cfg::pinRtcInt), rtcInterrupt, CHANGE);
 
 	connectToNetwork(true);
+}
+
+void printDateTime(const RtcDateTime &dt)
+{
+	char datestring[20];
+
+	snprintf_P(datestring,
+			   sizeof(datestring) / sizeof(datestring[0]),
+			   PSTR("%02u/%02u/%04u %02u:%02u:%02u"),
+			   dt.Month(),
+			   dt.Day(),
+			   dt.Year(),
+			   dt.Hour(),
+			   dt.Minute(),
+			   dt.Second());
+	Serial.print(datestring);
 }
 
 void loop()
@@ -131,7 +148,7 @@ void loop()
 		_updateDisplay--;
 		updateDisplay();
 	}
-#ifdef _DEBUG
+#ifdef CL_DEBUG
 	unsigned long ms = millis();
 	if (ms - _testTime > 10000 || ms < _testTime)
 	{
@@ -147,22 +164,4 @@ void loop()
 		Serial.println();
 	}
 #endif
-}
-
-#define countof(a) (sizeof(a) / sizeof(a[0]))
-
-void printDateTime(const RtcDateTime& dt)
-{
-	char datestring[20];
-
-	snprintf_P(datestring,
-		countof(datestring),
-		PSTR("%02u/%02u/%04u %02u:%02u:%02u"),
-		dt.Month(),
-		dt.Day(),
-		dt.Year(),
-		dt.Hour(),
-		dt.Minute(),
-		dt.Second());
-	Serial.print(datestring);
 }

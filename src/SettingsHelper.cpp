@@ -39,8 +39,8 @@ void SettingsHelper::save()
 
 void SettingsHelper::resetToDefaults()
 {
-	TimeChangeRule dst = { "DST", Last, Sun, Mar, 3, 0 };
-	TimeChangeRule std = { "STD", Last, Sun, Oct, 4, 0 };
+	TimeChangeRule dst = {"DST", Last, Sun, Mar, 3, 0};
+	TimeChangeRule std = {"STD", Last, Sun, Oct, 4, 0};
 
 	setWifiSsid("SSID");
 	setWifiPassword("PWD");
@@ -259,10 +259,5 @@ void SettingsHelper::makeSafeString(char *buffer, const char *value, uint maxLen
 
 bool SettingsHelper::isEqual(TimeChangeRule a, TimeChangeRule b)
 {
-	return strcmp(a.abbrev, b.abbrev)
-		&& a.week == b.week
-		&& a.dow == b.dow
-		&& a.month == b.month
-		&& a.hour == b.hour
-		&& a.offset == b.offset;
+	return strcmp(a.abbrev, b.abbrev) && a.week == b.week && a.dow == b.dow && a.month == b.month && a.hour == b.hour && a.offset == b.offset;
 }

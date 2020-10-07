@@ -25,7 +25,7 @@ void restartModule()
 	ESP.restart();
 }
 
-char* getSsid()
+char *getSsid()
 {
 	char ssid[6];
 

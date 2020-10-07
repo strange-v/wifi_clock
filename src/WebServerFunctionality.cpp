@@ -16,13 +16,14 @@ void stopWebServer()
 	server.stop();
 }
 
-void handleRoot() {
+void handleRoot()
+{
 	if (!isAuthenticated())
 		return;
 
 	taskTurnOfNetwork.setTimeInterval(5 * 60 * 1000ul);
 
-	const char* path = "/index.html";
+	const char *path = "/index.html";
 
 	if (!SPIFFS.exists(path))
 	{
@@ -48,27 +49,27 @@ void getConfig()
 	DynamicJsonBuffer jb(1042);
 	char buffer[768];
 
-	JsonObject& response = jb.createObject();
+	JsonObject &response = jb.createObject();
 	response["code"] = 0;
-	JsonObject& entity = response.createNestedObject("entity");
+	JsonObject &entity = response.createNestedObject("entity");
 
-	JsonObject& info = entity.createNestedObject("info");
+	JsonObject &info = entity.createNestedObject("info");
 	info["id"] = ESP.getChipId();
 	info["version"] = Cfg::version;
 
-	JsonObject& system = entity.createNestedObject("system");
+	JsonObject &system = entity.createNestedObject("system");
 	system["wifiSSID"] = _cfg->wifiSSID;
 	system["wifiPwd"] = "";
 	system["authUser"] = _cfg->authUser;
 	system["authPwd"] = "";
 	system["otaPwd"] = "";
 
-	JsonObject& time = entity.createNestedObject("time");
+	JsonObject &time = entity.createNestedObject("time");
 	time["ntpUrl"] = _cfg->ntpUrl;
 	time["syncPeriod"] = _cfg->syncPeriod;
 	time["useDST"] = _cfg->useDST;
 	time["offset"] = _cfg->offset;
-	JsonObject& startDST = time.createNestedObject("startDST");
+	JsonObject &startDST = time.createNestedObject("startDST");
 	TimeChangeRule dst = _cfg->startDST;
 	startDST["abbrev"] = dst.abbrev;
 	startDST["week"] = dst.week;
@@ -76,7 +77,7 @@ void getConfig()
 	startDST["month"] = dst.month;
 	startDST["hour"] = dst.hour;
 	startDST["offset"] = dst.offset;
-	JsonObject& endDST = time.createNestedObject("endDST");
+	JsonObject &endDST = time.createNestedObject("endDST");
 	TimeChangeRule std = _cfg->endDST;
 	endDST["abbrev"] = std.abbrev;
 	endDST["week"] = std.week;
@@ -85,16 +86,16 @@ void getConfig()
 	endDST["hour"] = std.hour;
 	endDST["offset"] = std.offset;
 
-	JsonObject& display = entity.createNestedObject("display");
+	JsonObject &display = entity.createNestedObject("display");
 	display["leadingZero"] = _cfg->leadingZero;
 	display["blinkColumn"] = _cfg->blinkColumn;
 	display["doNotBlink"] = _cfg->doNotBlink;
 	display["minBrightness"] = _cfg->minBrightness;
 	display["maxBrightness"] = _cfg->maxBrightness;
-	JsonObject& dnbFrom = display.createNestedObject("dnbFrom");
+	JsonObject &dnbFrom = display.createNestedObject("dnbFrom");
 	dnbFrom["hour"] = _cfg->dnbFrom.hour();
 	dnbFrom["minute"] = _cfg->dnbFrom.minute();
-	JsonObject& dnbTo = display.createNestedObject("dnbTo");
+	JsonObject &dnbTo = display.createNestedObject("dnbTo");
 	dnbTo["hour"] = _cfg->dnbTo.hour();
 	dnbTo["minute"] = _cfg->dnbTo.minute();
 
@@ -115,7 +116,7 @@ void saveConfig()
 		return;
 	}
 
-	JsonObject& root = jb.parseObject(server.arg("plain"));
+	JsonObject &root = jb.parseObject(server.arg("plain"));
 	if (!root.success() || !root.containsKey("display") || !root.containsKey("system") || !root.containsKey("time"))
 	{
 		server.send(200, APPLICATION_JSON, JSON_ERROR2);
@@ -124,12 +125,12 @@ void saveConfig()
 
 	bool restartRequired = false;
 
-	JsonObject& system = root["system"];
-	const char* system_wifiSSID = system["wifiSSID"];
-	const char* system_wifiPwd = system["wifiPwd"];
-	const char* system_authUser = system["authUser"];
-	const char* system_authPwd = system["authPwd"];
-	const char* system_otaPwd = system["otaPwd"];
+	JsonObject &system = root["system"];
+	const char *system_wifiSSID = system["wifiSSID"];
+	const char *system_wifiPwd = system["wifiPwd"];
+	const char *system_authUser = system["authUser"];
+	const char *system_authPwd = system["authPwd"];
+	const char *system_otaPwd = system["otaPwd"];
 	if (system_wifiSSID != nullptr && !isStringEmpty(system_wifiSSID) && strcmp(system_wifiSSID, _cfg->wifiSSID) != 0)
 	{
 		SettingsHelper::setWifiSsid(system_wifiSSID);
@@ -156,8 +157,8 @@ void saveConfig()
 		restartRequired = true;
 	}
 
-	JsonObject& time = root["time"];
-	const char* time_ntpUrl = time["ntpUrl"];
+	JsonObject &time = root["time"];
+	const char *time_ntpUrl = time["ntpUrl"];
 	unsigned int time_syncPeriod = time["syncPeriod"];
 	bool time_useDST = time["useDST"];
 	int offset = time["offset"];
@@ -180,13 +181,12 @@ void saveConfig()
 		offset = 0;
 		SettingsHelper::setOffset(offset);
 	}
-	
 
-	TimeChangeRule dst = { "dst", First, 1, 1, 1, offset };
-	TimeChangeRule std = { "std", First, 1, 1, 1, offset };
+	TimeChangeRule dst = {"dst", First, 1, 1, 1, offset};
+	TimeChangeRule std = {"std", First, 1, 1, 1, offset};
 	if (time_useDST)
 	{
-		JsonObject& time_startDST = time["startDST"];
+		JsonObject &time_startDST = time["startDST"];
 		uint8_t time_startDST_week = time_startDST["week"];
 		uint8_t time_startDST_dow = time_startDST["dow"];
 		uint8_t time_startDST_month = time_startDST["month"];
@@ -198,7 +198,7 @@ void saveConfig()
 		dst.offset = offset + 60;
 		//dst = { "dst", time_startDST_week, time_startDST_dow, time_startDST_month, time_startDST_hour, offset + 60 };
 
-		JsonObject& time_endDST = time["endDST"];
+		JsonObject &time_endDST = time["endDST"];
 		uint8_t time_endDST_week = time_endDST["week"];
 		uint8_t time_endDST_dow = time_endDST["dow"];
 		uint8_t time_endDST_month = time_endDST["month"];
@@ -218,7 +218,7 @@ void saveConfig()
 		timezone->setRules(dst, std);
 	}
 
-	JsonObject& display = root["display"];
+	JsonObject &display = root["display"];
 	bool display_leadingZero = display["leadingZero"];
 	bool display_blinkColumn = display["blinkColumn"];
 	bool display_doNotBlink = display["doNotBlink"];
@@ -263,7 +263,7 @@ void saveConfig()
 
 	SettingsHelper::save();
 	server.send(200, APPLICATION_JSON, JSON_SUCCESS);
-	
+
 	if (restartRequired)
 	{
 		delay(500);
@@ -284,7 +284,7 @@ bool isAuthenticated()
 	}
 }
 
-bool isStringEmpty(const char* value)
+bool isStringEmpty(const char *value)
 {
 	return value[0] == '\0';
 }

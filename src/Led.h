@@ -7,7 +7,7 @@
 class Led
 {
 public:
-	Led(TwoWire* wire, byte pinOe);
+	Led(TwoWire *wire, byte pinOe);
 	~Led();
 	void begin();
 	void showTime(RtcDateTime time, bool leadingZero);
@@ -16,13 +16,14 @@ public:
 	void showDot(bool show);
 	void setPWM(uint16_t value);
 	void spin();
+
 private:
 	void _showDigit(byte value, byte position, bool force = false);
 	void _showColumn(bool show, bool force = false);
 	void _showDot(bool show, bool force = false);
 
-	Adafruit_PWMServoDriver* _pwm1;
-	Adafruit_PWMServoDriver* _pwm2;
+	Adafruit_PWMServoDriver *_pwm1;
+	Adafruit_PWMServoDriver *_pwm2;
 	byte _pinOe;
 	uint16_t _pwmValue = 100;
 	byte _digit[4]{10, 10, 10, 10};
@@ -56,4 +57,3 @@ private:
 		{5, 9, 9, 2},
 	};
 };
-

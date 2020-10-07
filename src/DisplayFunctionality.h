@@ -19,12 +19,11 @@ void updateDisplay();
 extern RtcDS3231<TwoWire> Rtc;
 extern BH1750 lightMeter;
 extern Led led;
-extern Timezone* timezone;
+extern Timezone *timezone;
 
-extern Settings* _cfg;
+extern Settings *_cfg;
 extern ClockMode _clockMode;
 extern volatile byte _rtcPinState;
 extern volatile byte _updateDisplay;
 
 #endif
-

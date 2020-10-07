@@ -9,6 +9,5 @@
 void printModuleInfo();
 void printNetworkInfo();
 void restartModule();
-char* getSsid();
+char *getSsid();
 #endif
-

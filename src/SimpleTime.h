@@ -18,29 +18,29 @@ struct SimpleTime
 		_value = 0;
 	}
 
-	bool operator==(const SimpleTime& r)
+	bool operator==(const SimpleTime &r)
 	{
 		return _value == r._value;
 	}
-	bool operator!=(const SimpleTime& r)
+	bool operator!=(const SimpleTime &r)
 	{
 		return _value != r._value;
 	}
 
-	bool operator>(const SimpleTime& r)
+	bool operator>(const SimpleTime &r)
 	{
 		return _value > r._value;
 	}
-	bool operator<(const SimpleTime& r)
+	bool operator<(const SimpleTime &r)
 	{
 		return _value < r._value;
 	}
 
-	bool operator>=(const SimpleTime& r)
+	bool operator>=(const SimpleTime &r)
 	{
 		return _value >= r._value;
 	}
-	bool operator<=(const SimpleTime& r)
+	bool operator<=(const SimpleTime &r)
 	{
 		return _value <= r._value;
 	}

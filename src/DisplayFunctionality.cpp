@@ -19,8 +19,7 @@ void updateDisplay()
 		uint16_t pwm = map(lux, 0, 4000, _cfg->minBrightness, _cfg->maxBrightness);
 		led.setPWM(pwm);
 
-		if (_cfg->blinkColumn
-			&& (!_cfg->doNotBlink || !isTimeBetween(checkTime, _cfg->dnbFrom, _cfg->dnbTo - 1)))
+		if (_cfg->blinkColumn && (!_cfg->doNotBlink || !isTimeBetween(checkTime, _cfg->dnbFrom, _cfg->dnbTo - 1)))
 		{
 			led.showColumn(static_cast<bool>(_rtcPinState));
 		}

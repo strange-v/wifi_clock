@@ -1,6 +1,6 @@
 #include "Led.h"
 
-Led::Led(TwoWire* wire, byte pinOe)
+Led::Led(TwoWire *wire, byte pinOe)
 {
 	_pwm1 = new Adafruit_PWMServoDriver(&Wire, 0x40);
 	_pwm2 = new Adafruit_PWMServoDriver(&Wire, 0x41);
@@ -63,12 +63,12 @@ void Led::setPWM(uint16_t value)
 		return;
 
 	_pwmValue = value;
-	
+
 	_showDigit(_digit[0], 0, true);
 	_showDigit(_digit[1], 1, true);
 	_showDigit(_digit[2], 2, true);
 	_showDigit(_digit[3], 3, true);
-	
+
 	_showDot(_dotState, true);
 	_showColumn(_columnState, true);
 }
@@ -82,7 +82,7 @@ void Led::_showDigit(byte value, byte position, bool force)
 		return;
 
 	_digit[position] = value;
-	Adafruit_PWMServoDriver* pwm = position > 1 ? _pwm2 : _pwm1 ;
+	Adafruit_PWMServoDriver *pwm = position > 1 ? _pwm2 : _pwm1;
 	byte idx = position % 2 == 0 ? 0 : 8;
 
 	for (size_t i = 0; i < 7; i++)
@@ -114,7 +114,7 @@ void Led::spin()
 {
 	for (byte p = 0; p < 4; p++)
 	{
-		Adafruit_PWMServoDriver* pwm = p > 1 ? _pwm2 : _pwm1;
+		Adafruit_PWMServoDriver *pwm = p > 1 ? _pwm2 : _pwm1;
 		byte idx = p % 2 == 0 ? 0 : 8;
 		for (size_t i = 0; i < 7; i++)
 		{

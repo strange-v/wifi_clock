@@ -2,21 +2,17 @@
 
 void connectToNetwork(bool fallbackToAp)
 {
-	ehNetworkConnected = WiFi.onStationModeGotIP([](const WiFiEventStationModeGotIP& event)
-	{
+	ehNetworkConnected = WiFi.onStationModeGotIP([](const WiFiEventStationModeGotIP &event) {
 		if (_connectionState == CS_CONNECTING_W_AP)
 		{
 			initWebServer();
 		}
 		_connectionState = CS_CONNECTED;
-#ifdef _DEBUG
+#ifdef CL_DEBUG
 		Serial.println();
 		printNetworkInfo();
 #endif
 		taskManager.StartTask(&taskDelayedSyncTime);
-#ifndef _DEBUG
-		taskManager.StartTask(&taskTurnOfNetwork);
-#endif
 	});
 
 	_connectToNetwork(fallbackToAp);
@@ -24,9 +20,9 @@ void connectToNetwork(bool fallbackToAp)
 
 void startSoftAP()
 {
-  char ssid[6];
- memcpy(ssid, getSsid(), sizeof(ssid));
-#ifdef _DEBUG
+	char ssid[6];
+	memcpy(ssid, getSsid(), sizeof(ssid));
+#ifdef CL_DEBUG
 	Serial.println();
 	Serial.print(F("Start AP: "));
 	Serial.println(ssid);
@@ -39,7 +35,7 @@ void startSoftAP()
 
 	initWebServer();
 
-#ifdef _DEBUG
+#ifdef CL_DEBUG
 	IPAddress myIP = WiFi.softAPIP();
 	Serial.print(F("AP IP address: "));
 	Serial.println(myIP);
@@ -53,18 +49,19 @@ bool syncTime()
 	{
 		unsigned long epoch = timeClient.getEpochTime();
 		RtcDateTime date = RtcDateTime(epoch - 946684800UL); //ToDo: Move this constatn to an appropriate place
-		
+
 		Rtc.SetDateTime(date);
 		_lastTimeSync = Rtc.GetDateTime().TotalSeconds();
 		_clockMode = CM_CLOCK;
-#ifdef _DEBUG
+		_isRtcOk = true;
+#ifdef CL_DEBUG
 		Serial.print(F("Time: "));
 		Serial.println(timeClient.getFormattedTime());
 #endif
 	}
 	else
 	{
-#ifdef _DEBUG
+#ifdef CL_DEBUG
 		Serial.println(F("NTP error"));
 #endif
 	}
@@ -73,7 +70,7 @@ bool syncTime()
 
 void _connectToNetwork(bool fallbackToAp)
 {
-	Settings* sett = SettingsHelper::get();
+	Settings *sett = SettingsHelper::get();
 
 	_connectionState = fallbackToAp ? CS_CONNECTING_W_AP : CS_CONNECTING;
 	_connectionStart = millis();
@@ -83,7 +80,7 @@ void _connectToNetwork(bool fallbackToAp)
 
 	taskManager.StartTask(&taskCheckConnection);
 
-#ifdef _DEBUG
+#ifdef CL_DEBUG
 	Serial.print(F("SSID: "));
 	Serial.print(sett->wifiSSID);
 	Serial.print(F(" PWD: "));
@@ -103,7 +100,7 @@ void _checkConnection(uint32_t deltaTime)
 		return;
 	}
 
-#ifdef _DEBUG
+#ifdef CL_DEBUG
 	Serial.print('.');
 #endif
 
@@ -124,7 +121,7 @@ void _turnOfNetwork(uint32_t deltaTime)
 	if (_connectionState == CS_ACCESS_POINT)
 	{
 		WiFi.softAPdisconnect();
-		_clockMode = CM_LOADING;
+		_clockMode = _isRtcOk ? CM_CLOCK : CM_LOADING;
 	}
 	else
 	{
@@ -139,6 +136,7 @@ void _delayedSyncTime(uint32_t deltaTime)
 	if (syncTime())
 	{
 		taskManager.StopTask(&taskDelayedSyncTime);
+		taskManager.StartTask(&taskTurnOfNetwork);
 	}
 }
 
